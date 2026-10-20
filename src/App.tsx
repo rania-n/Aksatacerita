@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type IconName = "arrow" | "camera" | "clock" | "grid" | "map" | "menu" | "plus" | "sparkle" | "trash" | "whatsapp" | "x";
 
@@ -34,6 +34,21 @@ const initialPackages = [
   { id: 3, name: "Passport Booth", price: "25K", tag: "Ready in 10 min", color: "pink", features: ["6 pas foto", "Background pilihan", "File high-res"] },
 ];
 
+type Pkg = (typeof initialPackages)[number];
+const STORAGE_KEY = "aksata-packages";
+
+function loadPackages(): Pkg[] {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return initialPackages;
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed) && parsed.every((p) => p && typeof p.name === "string" && Array.isArray(p.features))) return parsed;
+  } catch {
+    /* data rusak: pakai default */
+  }
+  return initialPackages;
+}
+
 const frames = [
   { name: "Retro Blue", code: "01", className: "frame-blue", label: "SIGNATURE" },
   { name: "Tangerine Day", code: "02", className: "frame-orange", label: "NEW DROP" },
@@ -56,10 +71,11 @@ function Brand({ light = false }: { light?: boolean }) {
 
 function PublicPage() {
   const [menu, setMenu] = useState(false);
+  const [packages] = useState<Pkg[]>(loadPackages);
   const [filter, setFilter] = useState("Semua");
   const [activePackage, setActivePackage] = useState(0);
   const [booking, setBooking] = useState(false);
-  const [selectedSession, setSelectedSession] = useState("Regular Photobox");
+  const [selectedSession, setSelectedSession] = useState(() => loadPackages()[0]?.name ?? "Regular Photobox");
   const [progress, setProgress] = useState(0);
   const [boothIndex, setBoothIndex] = useState(0);
   const [countdown, setCountdown] = useState(0);
@@ -127,7 +143,7 @@ function PublicPage() {
     <section className="section shell" id="paket">
       <div className="section-heading"><div><span className="kicker">01 — PILIH CERITAMU</span><h2>Good moments,<br /><i>fair prices.</i></h2></div><p>Dari foto formal sampai pose paling chaos—ada sesi untuk setiap cerita.</p></div>
       <div className="package-grid">
-        {initialPackages.map((item, index) => <article key={item.id} className={`package-card ${activePackage === index ? "active" : ""} ${item.color}`} onMouseEnter={() => setActivePackage(index)} onClick={() => setActivePackage(index)}>
+        {packages.map((item, index) => <article key={item.id} className={`package-card ${activePackage === index ? "active" : ""} ${item.color}`} onMouseEnter={() => setActivePackage(index)} onClick={() => setActivePackage(index)}>
           <div className="package-top"><span>{item.tag}</span><Icon name={index === 0 ? "camera" : index === 1 ? "sparkle" : "grid"} size={28} /></div>
           <div><h3>{item.name}</h3><p>Mulai dari</p><strong><small>Rp</small>{item.price}</strong></div>
           <ul>{item.features.map((feature) => <li key={feature}><span>✓</span>{feature}</li>)}</ul>
@@ -204,7 +220,7 @@ function PublicPage() {
     <aside className={`booking-drawer ${booking ? "show" : ""}`} aria-hidden={!booking}>
       <div className="booking-head"><div><span>RESERVE YOUR MOMENT</span><h2>Pesan sesi.</h2></div><button onClick={() => setBooking(false)} aria-label="Tutup"><Icon name="x" /></button></div>
       <div className="booking-step"><span>01</span><div><b>Pilih sesi favoritmu</b><p>Kamu bisa konfirmasi ulang lewat WhatsApp.</p></div></div>
-      <div className="session-options">{initialPackages.map((item) => <button key={item.id} className={selectedSession === item.name ? "active" : ""} onClick={() => setSelectedSession(item.name)}><span><Icon name="camera" /></span><div><b>{item.name}</b><small>Mulai Rp{item.price}</small></div><i>{selectedSession === item.name ? "✓" : "○"}</i></button>)}</div>
+      <div className="session-options">{packages.map((item) => <button key={item.id} className={selectedSession === item.name ? "active" : ""} onClick={() => setSelectedSession(item.name)}><span><Icon name="camera" /></span><div><b>{item.name}</b><small>Mulai Rp{item.price}</small></div><i>{selectedSession === item.name ? "✓" : "○"}</i></button>)}</div>
       <div className="booking-step"><span>02</span><div><b>Pilih waktu datang</b><p>Setiap hari, 10.00—22.00 WIB</p></div></div>
       <div className="date-chips"><button>Hari ini<small>Walk in</small></button><button className="active">Besok<small>Available</small></button><button>Pilih tanggal<small>Calendar ↗</small></button></div>
       <a className="btn btn-primary booking-submit" href={`https://wa.me/6285117375305?text=Halo%20Aksatacerita!%20Aku%20mau%20pesan%20${encodeURIComponent(selectedSession)}`} target="_blank" rel="noreferrer"><Icon name="whatsapp" /> Lanjut via WhatsApp <Icon name="arrow" /></a>
@@ -214,43 +230,45 @@ function PublicPage() {
 }
 
 function AdminPage() {
-  const [packages, setPackages] = useState(initialPackages);
+  const [packages, setPackages] = useState<Pkg[]>(loadPackages);
   const [tab, setTab] = useState("Paket & Harga");
   const [toast, setToast] = useState(false);
-  const [form, setForm] = useState({ name: "", price: "" });
-  useEffect(() => {
-    const saved = localStorage.getItem("aksata-packages");
-    if (saved) setPackages(JSON.parse(saved));
-  }, []);
-  const save = (next = packages) => {
-    localStorage.setItem("aksata-packages", JSON.stringify(next));
-    setPackages(next); setToast(true); setTimeout(() => setToast(false), 1800);
+  const [form, setForm] = useState({ name: "", price: "", description: "" });
+  const nameRef = useRef<HTMLInputElement>(null);
+  const showToast = () => { setToast(true); window.setTimeout(() => setToast(false), 1800); };
+  const save = (next: Pkg[]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setPackages(next); showToast();
   };
   const addPackage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.price) return;
-    save([...packages, { id: Date.now(), name: form.name, price: form.price, tag: "New", color: "blue", features: ["15 menit sesi", "Soft files"] }]);
-    setForm({ name: "", price: "" });
+    const name = form.name.trim();
+    const price = form.price.trim().replace(/^rp\s*/i, "");
+    if (!name || !price) return;
+    const features = form.description.split(/\n|,/).map((f) => f.trim()).filter(Boolean);
+    const colors = ["blue", "orange", "pink"];
+    save([...packages, { id: Date.now(), name, price, tag: "New", color: colors[packages.length % colors.length], features: features.length ? features : ["15 menit sesi", "Soft files"] }]);
+    setForm({ name: "", price: "", description: "" });
   };
   const nav = ["Overview", "Paket & Harga", "Katalog Frame", "Galeri Momen", "Info Studio"];
   return <div className="admin">
     <aside><Brand light /><div className="admin-studio"><span>A</span><div><b>Aksatacerita</b><small>Studio workspace</small></div></div><nav>{nav.map((item, index) => <button className={tab === item ? "active" : ""} onClick={() => setTab(item)} key={item}><Icon name={index === 0 ? "grid" : index === 1 ? "camera" : index === 2 ? "sparkle" : index === 3 ? "grid" : "map"} />{item}</button>)}</nav><a className="back-site" href="/">← Lihat website</a></aside>
     <div className="admin-main">
-      <header><div><small>CONTENT MANAGER</small><h1>{tab}</h1></div><div className="admin-user"><span>Perubahan tersimpan lokal</span><b>AC</b></div></header>
+      <header><div><small>CONTENT MANAGER</small><h1>{tab}</h1></div><div className="admin-user"><span>Tersimpan di browser ini</span><b>AC</b></div></header>
       {tab === "Paket & Harga" || tab === "Overview" ? <div className="admin-content">
-        <div className="stats"><article><span>Total paket</span><b>{packages.length}</b><small>Aktif di website</small></article><article><span>Frame aktif</span><b>04</b><small>2 limited edition</small></article><article><span>Galeri</span><b>24</b><small>Foto terpublikasi</small></article></div>
+        <div className="stats"><article><span>Total paket</span><b>{packages.length}</b><small>Aktif di website</small></article><article><span>Frame aktif</span><b>{String(frames.length).padStart(2, "0")}</b><small>Katalog bulan ini</small></article><article><span>Galeri</span><b>{gallery.length}</b><small>Foto terpublikasi</small></article></div>
         <div className="admin-grid">
-          <section className="panel"><div className="panel-head"><div><span>DAFTAR LAYANAN</span><h2>Paket & Harga</h2></div><button className="icon-button"><Icon name="plus" /></button></div>
+          <section className="panel"><div className="panel-head"><div><span>DAFTAR LAYANAN</span><h2>Paket & Harga</h2></div><button className="icon-button" type="button" aria-label="Tambah paket" onClick={() => nameRef.current?.focus()}><Icon name="plus" /></button></div>
             <div className="admin-list">{packages.map((item) => <div className="admin-item" key={item.id}><div className={`admin-thumb ${item.color}`}><Icon name="camera" /></div><div><b>{item.name}</b><small>{item.features.join(" · ")}</small></div><strong>Rp{item.price}</strong><button onClick={() => save(packages.filter((p) => p.id !== item.id))} aria-label="Hapus paket"><Icon name="trash" /></button></div>)}</div>
           </section>
-          <form className="panel admin-form" onSubmit={addPackage}><div className="panel-head"><div><span>QUICK ACTION</span><h2>Tambah Paket</h2></div></div><label>Nama paket<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Contoh: Bestie Session" /></label><label>Harga mulai<input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="Contoh: 50K" /></label><label>Deskripsi<textarea placeholder="Apa saja yang didapat?" rows={4} /></label><button className="btn btn-primary" type="submit">Publikasikan <Icon name="arrow" /></button></form>
+          <form className="panel admin-form" onSubmit={addPackage}><div className="panel-head"><div><span>QUICK ACTION</span><h2>Tambah Paket</h2></div></div><label>Nama paket<input ref={nameRef} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Contoh: Bestie Session" /></label><label>Harga mulai<input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="Contoh: 50K" /></label><label>Deskripsi<textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Satu poin per baris, mis: 15 menit sesi" rows={4} /></label><button className="btn btn-primary" type="submit">Publikasikan <Icon name="arrow" /></button></form>
         </div>
-      </div> : <div className="placeholder-panel"><div className="upload-visual"><Icon name={tab === "Info Studio" ? "map" : "plus"} size={36} /></div><span>MODUL KONTEN</span><h2>{tab}</h2><p>Area ini siap untuk mengunggah, menyusun, dan memperbarui konten studio.</p><button className="btn btn-primary" onClick={() => { setToast(true); setTimeout(() => setToast(false), 1800); }}><Icon name="plus" /> Tambah konten baru</button></div>}
+      </div> : <div className="placeholder-panel"><div className="upload-visual"><Icon name={tab === "Info Studio" ? "map" : "plus"} size={36} /></div><span>MODUL KONTEN</span><h2>{tab}</h2><p>Area ini siap untuk mengunggah, menyusun, dan memperbarui konten studio.</p><button className="btn btn-primary" onClick={showToast}><Icon name="plus" /> Tambah konten baru</button></div>}
     </div>
     {toast && <div className="toast">✓ Perubahan berhasil disimpan</div>}
   </div>;
 }
 
 export default function App() {
-  return window.location.pathname.startsWith("/admin") ? <AdminPage /> : <PublicPage />;
+  return /^\/admin(\/|$)/.test(window.location.pathname) ? <AdminPage /> : <PublicPage />;
 }
