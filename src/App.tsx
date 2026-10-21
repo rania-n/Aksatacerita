@@ -36,34 +36,98 @@ const initialPackages = [
 
 type Pkg = (typeof initialPackages)[number];
 const STORAGE_KEY = "aksata-packages";
+const FRAMES_KEY = "aksata-frames";
+const GALLERY_KEY = "aksata-gallery";
+const INFO_KEY = "aksata-info";
 
-function loadPackages(): Pkg[] {
+function loadStored<T>(key: string, fallback: T, valid: (data: unknown) => boolean): T {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return initialPackages;
+    const saved = localStorage.getItem(key);
+    if (!saved) return fallback;
     const parsed = JSON.parse(saved);
-    if (Array.isArray(parsed) && parsed.every((p) => p && typeof p.name === "string" && Array.isArray(p.features))) return parsed;
+    if (valid(parsed)) return parsed as T;
   } catch {
     /* data rusak: pakai default */
   }
-  return initialPackages;
+  return fallback;
 }
 
-const frames = [
-  { name: "Retro Blue", code: "01", className: "frame-blue", label: "SIGNATURE" },
-  { name: "Tangerine Day", code: "02", className: "frame-orange", label: "NEW DROP" },
-  { name: "Garden Club", code: "03", className: "frame-green", label: "LIMITED" },
-  { name: "Pink Crush", code: "04", className: "frame-pink", label: "FAVORITE" },
-];
+function saveStored(key: string, value: unknown): boolean {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-const gallery = [
-  { src: photos[0], cat: "Bestie", title: "Sunday with besties" },
-  { src: photos[3], cat: "Couple", title: "Us being us" },
-  { src: photos[4], cat: "Event", title: "Birthday chaos" },
-  { src: photos[2], cat: "Wisuda", title: "Finally graduated!" },
-  { src: photos[5], cat: "Bestie", title: "Main character energy" },
-  { src: photos[1], cat: "Event", title: "A little celebration" },
+const isArrayOf = (check: (x: any) => boolean) => (data: unknown) => Array.isArray(data) && data.every((x) => x && check(x));
+
+function loadPackages(): Pkg[] {
+  return loadStored(STORAGE_KEY, initialPackages, isArrayOf((p) => typeof p.name === "string" && Array.isArray(p.features)));
+}
+
+type Frame = { id: number; name: string; className: string; label: string };
+const frameColors = [
+  { className: "frame-blue", label: "Biru" },
+  { className: "frame-orange", label: "Oranye" },
+  { className: "frame-green", label: "Hijau" },
+  { className: "frame-pink", label: "Pink" },
 ];
+const defaultFrames: Frame[] = [
+  { id: 1, name: "Retro Blue", className: "frame-blue", label: "SIGNATURE" },
+  { id: 2, name: "Tangerine Day", className: "frame-orange", label: "NEW DROP" },
+  { id: 3, name: "Garden Club", className: "frame-green", label: "LIMITED" },
+  { id: 4, name: "Pink Crush", className: "frame-pink", label: "FAVORITE" },
+];
+const loadFrames = () => loadStored<Frame[]>(FRAMES_KEY, defaultFrames, isArrayOf((f) => typeof f.name === "string" && typeof f.className === "string"));
+
+type GalleryItem = { id: number; src: string; cat: string; title: string };
+const galleryCategories = ["Event", "Wisuda", "Couple", "Bestie"];
+const defaultGallery: GalleryItem[] = [
+  { id: 1, src: photos[0], cat: "Bestie", title: "Sunday with besties" },
+  { id: 2, src: photos[3], cat: "Couple", title: "Us being us" },
+  { id: 3, src: photos[4], cat: "Event", title: "Birthday chaos" },
+  { id: 4, src: photos[2], cat: "Wisuda", title: "Finally graduated!" },
+  { id: 5, src: photos[5], cat: "Bestie", title: "Main character energy" },
+  { id: 6, src: photos[1], cat: "Event", title: "A little celebration" },
+];
+const loadGallery = () => loadStored<GalleryItem[]>(GALLERY_KEY, defaultGallery, isArrayOf((g) => typeof g.src === "string" && typeof g.title === "string"));
+
+const defaultInfo = {
+  place: "Ruma Pinara",
+  address: "Jl. I Gusti Ngurah Rai Gg. 8 No. 90,\nJepun, Tulungagung, Jawa Timur",
+  days: "Setiap Hari",
+  hours: "10.00 — 22.00 WIB",
+  lastSession: "Last session 21.30",
+  whatsapp: "6285117375305",
+  instagram: "aksatacerita",
+  mapsQuery: "Ruma Pinara Tulungagung",
+};
+type Info = typeof defaultInfo;
+const loadInfo = (): Info => ({ ...defaultInfo, ...loadStored<Partial<Info>>(INFO_KEY, {}, (d) => !!d && typeof d === "object" && !Array.isArray(d)) });
+
+// Kecilkan gambar upload supaya muat di localStorage
+function fileToDataUrl(file: File, maxSize = 900): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("image"));
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 function Brand({ light = false }: { light?: boolean }) {
   return <a className={`brand official-brand ${light ? "brand-light" : ""}`} href="/" aria-label="Aksata Cerita"><span className="brand-crop"><img src="/assets/aksata-logo.png" alt="Aksata Cerita" /></span></a>;
@@ -72,6 +136,9 @@ function Brand({ light = false }: { light?: boolean }) {
 function PublicPage() {
   const [menu, setMenu] = useState(false);
   const [packages] = useState<Pkg[]>(loadPackages);
+  const [frames] = useState<Frame[]>(loadFrames);
+  const [gallery] = useState<GalleryItem[]>(loadGallery);
+  const [info] = useState<Info>(loadInfo);
   const [filter, setFilter] = useState("Semua");
   const [activePackage, setActivePackage] = useState(0);
   const [booking, setBooking] = useState(false);
@@ -150,20 +217,20 @@ function PublicPage() {
           <button className="package-select" onClick={() => { setSelectedSession(item.name); setBooking(true); }}>Pilih paket <Icon name="arrow" /></button>
         </article>)}
       </div>
-      <p className="package-footnote">Butuh photobooth untuk wedding, brand activation, atau event? <a href="https://wa.me/6285117375305">Let's collaborate ↗</a></p>
+      <p className="package-footnote">Butuh photobooth untuk wedding, brand activation, atau event? <a href={`https://wa.me/${info.whatsapp}`}>Let's collaborate ↗</a></p>
     </section>
 
     <section className="frames-section" id="frame">
       <div className="shell">
         <div className="section-heading compact"><div><span className="kicker">02 — FRAME OF THE MONTH</span><h2>Pilih mood.<br /><i>Cetak ceritamu.</i></h2></div><div className="limited-pill"><span>●</span> Updated monthly</div></div>
         <div className="frames-scroll">
-          {frames.map((frame, i) => <article className="frame-wrap" key={frame.name}>
+          {frames.map((frame, i) => <article className="frame-wrap" key={frame.id}>
             <div className={`frame-strip ${frame.className}`}>
               <div className="frame-head"><b>AKSATA<br />CERITA</b><span>{frame.label}</span></div>
               {[photos[(i + 1) % photos.length], photos[(i + 2) % photos.length]].map((src) => <img src={src} alt="" key={src} />)}
-              <div className="frame-bottom"><span>{frame.name}</span><b>0{frame.code} / 25</b></div>
+              <div className="frame-bottom"><span>{frame.name}</span><b>{String(i + 1).padStart(2, "0")} / 25</b></div>
             </div>
-            <div className="frame-meta"><span>{frame.code}</span><h3>{frame.name}</h3><button aria-label={`Lihat ${frame.name}`}><Icon name="arrow" /></button></div>
+            <div className="frame-meta"><span>{String(i + 1).padStart(2, "0")}</span><h3>{frame.name}</h3><button aria-label={`Lihat ${frame.name}`}><Icon name="arrow" /></button></div>
           </article>)}
         </div>
       </div>
@@ -200,22 +267,22 @@ function PublicPage() {
     <section className="section gallery-section shell" id="galeri">
       <div className="gallery-title"><span className="kicker">03 — TEMAN CERITA</span><h2>Real people.<br /><i>Real fun.</i></h2><p>Tag <b>@aksatacerita</b> supaya ceritamu bisa ikut tampil di sini.</p></div>
       <div className="filters">{["Semua", "Event", "Wisuda", "Couple", "Bestie"].map((cat) => <button onClick={() => setFilter(cat)} className={filter === cat ? "active" : ""} key={cat}>{cat}</button>)}</div>
-      <div className="masonry">{visible.map((item, index) => <figure className={index % 3 === 1 ? "tall" : ""} key={item.src}><img src={item.src} alt={item.title} /><figcaption><span>{item.cat}</span><b>{item.title}</b></figcaption></figure>)}</div>
+      <div className="masonry">{visible.map((item, index) => <figure className={index % 3 === 1 ? "tall" : ""} key={item.id}><img src={item.src} alt={item.title} /><figcaption><span>{item.cat}</span><b>{item.title}</b></figcaption></figure>)}</div>
     </section>
 
     <section className="visit" id="lokasi">
       <div className="visit-map"><iframe title="Lokasi Aksatacerita" src="https://www.openstreetmap.org/export/embed.html?bbox=111.89%2C-8.09%2C111.94%2C-8.04&layer=mapnik" loading="lazy" /><div className="map-stamp"><Brand /><span>YOU'RE ALMOST HERE!</span></div></div>
       <div className="visit-copy">
         <span className="kicker">04 — COME SAY HI</span><h2>Sampai ketemu<br />di <i>studio!</i></h2>
-        <div className="info-row"><Icon name="map" /><div><b>Ruma Pinara</b><p>Jl. I Gusti Ngurah Rai Gg. 8 No. 90,<br />Jepun, Tulungagung, Jawa Timur</p></div></div>
-        <div className="info-row"><Icon name="clock" /><div><b>Setiap Hari</b><p>10.00 — 22.00 WIB<br /><small>Last session 21.30</small></p></div></div>
-        <a className="btn btn-dark" href="https://maps.google.com/?q=Ruma+Pinara+Tulungagung" target="_blank" rel="noreferrer">Buka di Google Maps <Icon name="arrow" /></a>
+        <div className="info-row"><Icon name="map" /><div><b>{info.place}</b><p>{info.address.split("\n").map((line, i) => <span key={i}>{i > 0 && <br />}{line}</span>)}</p></div></div>
+        <div className="info-row"><Icon name="clock" /><div><b>{info.days}</b><p>{info.hours}{info.lastSession && <><br /><small>{info.lastSession}</small></>}</p></div></div>
+        <a className="btn btn-dark" href={`https://maps.google.com/?q=${encodeURIComponent(info.mapsQuery)}`} target="_blank" rel="noreferrer">Buka di Google Maps <Icon name="arrow" /></a>
       </div>
     </section>
 
     <section className="cta-section"><div className="cta-orbit orbit-one">SAY CHEESE · SAY CHEESE ·</div><div className="cta-stars">✦　✧　✦</div><h2>Ready to make<br />your own <i>story?</i></h2><p>Nggak perlu jago pose. Datang aja, sisanya biar kami yang bikin seru.</p><button className="btn btn-light" onClick={() => setBooking(true)}><Icon name="camera" /> Mulai ceritamu</button></section>
-    <footer><div className="shell footer-top"><Brand light /><div><b>Explore</b><a href="#paket">Paket & Harga</a><a href="#frame">Katalog Frame</a><a href="#galeri">Galeri Momen</a></div><div><b>Social</b><a href="https://instagram.com/aksatacerita">@aksatacerita ↗</a><a href="https://wa.me/6285117375305">WhatsApp ↗</a></div><div className="footer-note">Made for<br /><i>good stories.</i></div></div><div className="shell footer-bottom"><span>© 2025 AKSATACERITA PHOTOBOOTH</span><span>TULUNGAGUNG, EAST JAVA</span></div></footer>
-    <a className="floating-wa" href="https://wa.me/6285117375305" target="_blank" rel="noreferrer" aria-label="Chat WhatsApp"><Icon name="whatsapp" /></a>
+    <footer><div className="shell footer-top"><Brand light /><div><b>Explore</b><a href="#paket">Paket & Harga</a><a href="#frame">Katalog Frame</a><a href="#galeri">Galeri Momen</a></div><div><b>Social</b><a href={`https://instagram.com/${info.instagram}`}>@{info.instagram} ↗</a><a href={`https://wa.me/${info.whatsapp}`}>WhatsApp ↗</a></div><div className="footer-note">Made for<br /><i>good stories.</i></div></div><div className="shell footer-bottom"><span>© 2025 AKSATACERITA PHOTOBOOTH</span><span>TULUNGAGUNG, EAST JAVA</span></div></footer>
+    <a className="floating-wa" href={`https://wa.me/${info.whatsapp}`} target="_blank" rel="noreferrer" aria-label="Chat WhatsApp"><Icon name="whatsapp" /></a>
     <div className={`booking-backdrop ${booking ? "show" : ""}`} onClick={() => setBooking(false)} />
     <aside className={`booking-drawer ${booking ? "show" : ""}`} aria-hidden={!booking}>
       <div className="booking-head"><div><span>RESERVE YOUR MOMENT</span><h2>Pesan sesi.</h2></div><button onClick={() => setBooking(false)} aria-label="Tutup"><Icon name="x" /></button></div>
@@ -223,7 +290,7 @@ function PublicPage() {
       <div className="session-options">{packages.map((item) => <button key={item.id} className={selectedSession === item.name ? "active" : ""} onClick={() => setSelectedSession(item.name)}><span><Icon name="camera" /></span><div><b>{item.name}</b><small>Mulai Rp{item.price}</small></div><i>{selectedSession === item.name ? "✓" : "○"}</i></button>)}</div>
       <div className="booking-step"><span>02</span><div><b>Pilih waktu datang</b><p>Setiap hari, 10.00—22.00 WIB</p></div></div>
       <div className="date-chips"><button>Hari ini<small>Walk in</small></button><button className="active">Besok<small>Available</small></button><button>Pilih tanggal<small>Calendar ↗</small></button></div>
-      <a className="btn btn-primary booking-submit" href={`https://wa.me/6285117375305?text=Halo%20Aksatacerita!%20Aku%20mau%20pesan%20${encodeURIComponent(selectedSession)}`} target="_blank" rel="noreferrer"><Icon name="whatsapp" /> Lanjut via WhatsApp <Icon name="arrow" /></a>
+      <a className="btn btn-primary booking-submit" href={`https://wa.me/${info.whatsapp}?text=Halo%20Aksatacerita!%20Aku%20mau%20pesan%20${encodeURIComponent(selectedSession)}`} target="_blank" rel="noreferrer"><Icon name="whatsapp" /> Lanjut via WhatsApp <Icon name="arrow" /></a>
       <p className="booking-note">No payment needed now · Fast response during studio hours</p>
     </aside>
   </main>;
@@ -231,15 +298,25 @@ function PublicPage() {
 
 function AdminPage() {
   const [packages, setPackages] = useState<Pkg[]>(loadPackages);
-  const [tab, setTab] = useState("Paket & Harga");
-  const [toast, setToast] = useState(false);
+  const [frames, setFrames] = useState<Frame[]>(loadFrames);
+  const [gallery, setGallery] = useState<GalleryItem[]>(loadGallery);
+  const [info, setInfo] = useState<Info>(loadInfo);
+  const [tab, setTab] = useState("Overview");
+  const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const [form, setForm] = useState({ name: "", price: "", description: "" });
+  const [frameForm, setFrameForm] = useState({ name: "", label: "NEW DROP", className: "frame-blue" });
+  const [galleryForm, setGalleryForm] = useState({ title: "", cat: "Event", src: "" });
   const nameRef = useRef<HTMLInputElement>(null);
-  const showToast = () => { setToast(true); window.setTimeout(() => setToast(false), 1800); };
-  const save = (next: Pkg[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    setPackages(next); showToast();
+  const frameRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const showToast = (text = "Perubahan berhasil disimpan", error = false) => { setToast({ text, error }); window.setTimeout(() => setToast(null), 2200); };
+  const persist = (key: string, value: unknown, apply: () => void) => {
+    if (!saveStored(key, value)) return showToast("Gagal menyimpan: penyimpanan browser penuh", true);
+    apply(); showToast();
   };
+  const savePackages = (next: Pkg[]) => persist(STORAGE_KEY, next, () => setPackages(next));
+  const saveFrames = (next: Frame[]) => persist(FRAMES_KEY, next, () => setFrames(next));
+  const saveGallery = (next: GalleryItem[]) => persist(GALLERY_KEY, next, () => setGallery(next));
   const addPackage = (e: React.FormEvent) => {
     e.preventDefault();
     const name = form.name.trim();
@@ -247,25 +324,101 @@ function AdminPage() {
     if (!name || !price) return;
     const features = form.description.split(/\n|,/).map((f) => f.trim()).filter(Boolean);
     const colors = ["blue", "orange", "pink"];
-    save([...packages, { id: Date.now(), name, price, tag: "New", color: colors[packages.length % colors.length], features: features.length ? features : ["15 menit sesi", "Soft files"] }]);
+    savePackages([...packages, { id: Date.now(), name, price, tag: "New", color: colors[packages.length % colors.length], features: features.length ? features : ["15 menit sesi", "Soft files"] }]);
     setForm({ name: "", price: "", description: "" });
   };
+  const addFrame = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = frameForm.name.trim();
+    if (!name) return;
+    saveFrames([...frames, { id: Date.now(), name, className: frameForm.className, label: frameForm.label.trim().toUpperCase() || "NEW DROP" }]);
+    setFrameForm({ name: "", label: "NEW DROP", className: "frame-blue" });
+  };
+  const pickPhoto = async (file?: File) => {
+    if (!file) return;
+    try { setGalleryForm((g) => ({ ...g, src: "" })); const src = await fileToDataUrl(file); setGalleryForm((g) => ({ ...g, src })); }
+    catch { showToast("File bukan gambar yang valid", true); }
+  };
+  const addGallery = (e: React.FormEvent) => {
+    e.preventDefault();
+    const title = galleryForm.title.trim();
+    if (!galleryForm.src) return showToast("Pilih foto dulu", true);
+    if (!title) return;
+    saveGallery([{ id: Date.now(), src: galleryForm.src, cat: galleryForm.cat, title }, ...gallery]);
+    setGalleryForm({ title: "", cat: galleryForm.cat, src: "" });
+  };
+  const saveInfo = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean: Info = { ...info, whatsapp: info.whatsapp.replace(/\D/g, ""), instagram: info.instagram.replace(/^@/, "").trim() };
+    persist(INFO_KEY, clean, () => setInfo(clean));
+  };
+  const resetAll = () => {
+    if (!window.confirm("Kembalikan semua konten ke bawaan?")) return;
+    [STORAGE_KEY, FRAMES_KEY, GALLERY_KEY, INFO_KEY].forEach((k) => localStorage.removeItem(k));
+    setPackages(initialPackages); setFrames(defaultFrames); setGallery(defaultGallery); setInfo(defaultInfo); showToast("Konten dikembalikan ke bawaan");
+  };
+  const goAdd = (target: string, ref: React.RefObject<HTMLInputElement | null>) => { setTab(target); window.setTimeout(() => ref.current?.focus(), 0); };
+  const setI = (key: keyof Info) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setInfo({ ...info, [key]: e.target.value });
   const nav = ["Overview", "Paket & Harga", "Katalog Frame", "Galeri Momen", "Info Studio"];
+  const stats = <div className="stats"><article><span>Total paket</span><b>{packages.length}</b><small>Aktif di website</small></article><article><span>Frame aktif</span><b>{String(frames.length).padStart(2, "0")}</b><small>Katalog bulan ini</small></article><article><span>Galeri</span><b>{gallery.length}</b><small>Foto terpublikasi</small></article></div>;
   return <div className="admin">
     <aside><Brand light /><div className="admin-studio"><span>A</span><div><b>Aksatacerita</b><small>Studio workspace</small></div></div><nav>{nav.map((item, index) => <button className={tab === item ? "active" : ""} onClick={() => setTab(item)} key={item}><Icon name={index === 0 ? "grid" : index === 1 ? "camera" : index === 2 ? "sparkle" : index === 3 ? "grid" : "map"} />{item}</button>)}</nav><a className="back-site" href="/">← Lihat website</a></aside>
     <div className="admin-main">
       <header><div><small>CONTENT MANAGER</small><h1>{tab}</h1></div><div className="admin-user"><span>Tersimpan di browser ini</span><b>AC</b></div></header>
-      {tab === "Paket & Harga" || tab === "Overview" ? <div className="admin-content">
-        <div className="stats"><article><span>Total paket</span><b>{packages.length}</b><small>Aktif di website</small></article><article><span>Frame aktif</span><b>{String(frames.length).padStart(2, "0")}</b><small>Katalog bulan ini</small></article><article><span>Galeri</span><b>{gallery.length}</b><small>Foto terpublikasi</small></article></div>
+
+      {tab === "Overview" && <div className="admin-content">
+        {stats}
+        <div className="admin-grid">
+          <section className="panel"><div className="panel-head"><div><span>RINGKASAN</span><h2>Kelola konten</h2></div></div>
+            <div className="admin-list">{[["Paket & Harga", `${packages.length} paket`], ["Katalog Frame", `${frames.length} frame`], ["Galeri Momen", `${gallery.length} foto`], ["Info Studio", info.place]].map(([t, d]) => <div className="admin-item overview-item" key={t}><div className="admin-thumb blue"><Icon name="grid" /></div><div><b>{t}</b><small>{d}</small></div><span /><button onClick={() => setTab(t)} aria-label={`Buka ${t}`}><Icon name="arrow" /></button></div>)}</div>
+          </section>
+          <section className="panel admin-form"><div className="panel-head"><div><span>PENGATURAN</span><h2>Reset konten</h2></div></div><p className="admin-hint">Data disimpan di browser ini. Reset akan mengembalikan paket, frame, galeri, dan info studio ke bawaan.</p><button className="btn btn-dark" type="button" onClick={resetAll}>Kembalikan ke bawaan</button></section>
+        </div>
+      </div>}
+
+      {tab === "Paket & Harga" && <div className="admin-content">
+        {stats}
         <div className="admin-grid">
           <section className="panel"><div className="panel-head"><div><span>DAFTAR LAYANAN</span><h2>Paket & Harga</h2></div><button className="icon-button" type="button" aria-label="Tambah paket" onClick={() => nameRef.current?.focus()}><Icon name="plus" /></button></div>
-            <div className="admin-list">{packages.map((item) => <div className="admin-item" key={item.id}><div className={`admin-thumb ${item.color}`}><Icon name="camera" /></div><div><b>{item.name}</b><small>{item.features.join(" · ")}</small></div><strong>Rp{item.price}</strong><button onClick={() => save(packages.filter((p) => p.id !== item.id))} aria-label="Hapus paket"><Icon name="trash" /></button></div>)}</div>
+            <div className="admin-list">{packages.map((item) => <div className="admin-item" key={item.id}><div className={`admin-thumb ${item.color}`}><Icon name="camera" /></div><div><b>{item.name}</b><small>{item.features.join(" · ")}</small></div><strong>Rp{item.price}</strong><button onClick={() => savePackages(packages.filter((p) => p.id !== item.id))} aria-label="Hapus paket"><Icon name="trash" /></button></div>)}</div>
           </section>
           <form className="panel admin-form" onSubmit={addPackage}><div className="panel-head"><div><span>QUICK ACTION</span><h2>Tambah Paket</h2></div></div><label>Nama paket<input ref={nameRef} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Contoh: Bestie Session" /></label><label>Harga mulai<input value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="Contoh: 50K" /></label><label>Deskripsi<textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Satu poin per baris, mis: 15 menit sesi" rows={4} /></label><button className="btn btn-primary" type="submit">Publikasikan <Icon name="arrow" /></button></form>
         </div>
-      </div> : <div className="placeholder-panel"><div className="upload-visual"><Icon name={tab === "Info Studio" ? "map" : "plus"} size={36} /></div><span>MODUL KONTEN</span><h2>{tab}</h2><p>Area ini siap untuk mengunggah, menyusun, dan memperbarui konten studio.</p><button className="btn btn-primary" onClick={showToast}><Icon name="plus" /> Tambah konten baru</button></div>}
+      </div>}
+
+      {tab === "Katalog Frame" && <div className="admin-content">
+        <div className="admin-grid">
+          <section className="panel"><div className="panel-head"><div><span>KATALOG</span><h2>Frame aktif</h2></div><button className="icon-button" type="button" aria-label="Tambah frame" onClick={() => frameRef.current?.focus()}><Icon name="plus" /></button></div>
+            <div className="admin-list">{frames.length === 0 && <p className="admin-hint">Belum ada frame. Tambahkan lewat form.</p>}{frames.map((f) => <div className="admin-item" key={f.id}><div className={`admin-frame-swatch ${f.className}`} /><div><b>{f.name}</b><small>{f.label}</small></div><span /><button onClick={() => saveFrames(frames.filter((x) => x.id !== f.id))} aria-label="Hapus frame"><Icon name="trash" /></button></div>)}</div>
+          </section>
+          <form className="panel admin-form" onSubmit={addFrame}><div className="panel-head"><div><span>QUICK ACTION</span><h2>Tambah Frame</h2></div></div><label>Nama frame<input ref={frameRef} value={frameForm.name} onChange={(e) => setFrameForm({ ...frameForm, name: e.target.value })} placeholder="Contoh: Sunset Vibes" /></label><label>Label<input value={frameForm.label} onChange={(e) => setFrameForm({ ...frameForm, label: e.target.value })} placeholder="Contoh: NEW DROP" /></label><label>Warna<select value={frameForm.className} onChange={(e) => setFrameForm({ ...frameForm, className: e.target.value })}>{frameColors.map((c) => <option key={c.className} value={c.className}>{c.label}</option>)}</select></label><button className="btn btn-primary" type="submit">Publikasikan <Icon name="arrow" /></button></form>
+        </div>
+      </div>}
+
+      {tab === "Galeri Momen" && <div className="admin-content">
+        <div className="admin-grid">
+          <section className="panel"><div className="panel-head"><div><span>GALERI</span><h2>Foto terpublikasi</h2></div><button className="icon-button" type="button" aria-label="Tambah foto" onClick={() => galleryRef.current?.focus()}><Icon name="plus" /></button></div>
+            <div className="admin-list">{gallery.length === 0 && <p className="admin-hint">Belum ada foto. Unggah lewat form.</p>}{gallery.map((g) => <div className="admin-item" key={g.id}><img className="admin-photo" src={g.src} alt="" /><div><b>{g.title}</b><small>{g.cat}</small></div><span /><button onClick={() => saveGallery(gallery.filter((x) => x.id !== g.id))} aria-label="Hapus foto"><Icon name="trash" /></button></div>)}</div>
+          </section>
+          <form className="panel admin-form" onSubmit={addGallery}><div className="panel-head"><div><span>QUICK ACTION</span><h2>Tambah Foto</h2></div></div><label>Foto<input ref={galleryRef} type="file" accept="image/*" onChange={(e) => { pickPhoto(e.target.files?.[0]); e.target.value = ""; }} /></label>{galleryForm.src && <img className="admin-preview" src={galleryForm.src} alt="Pratinjau" />}<label>Judul<input value={galleryForm.title} onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })} placeholder="Contoh: Sunday with besties" /></label><label>Kategori<select value={galleryForm.cat} onChange={(e) => setGalleryForm({ ...galleryForm, cat: e.target.value })}>{galleryCategories.map((c) => <option key={c}>{c}</option>)}</select></label><button className="btn btn-primary" type="submit">Publikasikan <Icon name="arrow" /></button></form>
+        </div>
+      </div>}
+
+      {tab === "Info Studio" && <div className="admin-content">
+        <form className="panel admin-form admin-info" onSubmit={saveInfo}><div className="panel-head"><div><span>PROFIL STUDIO</span><h2>Info Studio</h2></div></div>
+          <label>Nama tempat<input value={info.place} onChange={setI("place")} /></label>
+          <label>Alamat<textarea rows={3} value={info.address} onChange={setI("address")} /></label>
+          <label>Hari buka<input value={info.days} onChange={setI("days")} /></label>
+          <label>Jam buka<input value={info.hours} onChange={setI("hours")} /></label>
+          <label>Keterangan sesi terakhir<input value={info.lastSession} onChange={setI("lastSession")} /></label>
+          <label>WhatsApp (format 62...)<input value={info.whatsapp} onChange={setI("whatsapp")} inputMode="numeric" /></label>
+          <label>Instagram<input value={info.instagram} onChange={setI("instagram")} /></label>
+          <label>Kata kunci Google Maps<input value={info.mapsQuery} onChange={setI("mapsQuery")} /></label>
+          <button className="btn btn-primary" type="submit">Simpan perubahan <Icon name="arrow" /></button>
+        </form>
+      </div>}
     </div>
-    {toast && <div className="toast">✓ Perubahan berhasil disimpan</div>}
+    {toast && <div className={`toast ${toast.error ? "error" : ""}`}>{toast.error ? "✕" : "✓"} {toast.text}</div>}
   </div>;
 }
 

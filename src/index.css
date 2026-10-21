@@ -176,3 +176,10 @@ footer { background:#0d0d0d;color:white;padding:65px 0 25px; }.footer-top{displa
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; }
 }
+
+/* Admin: modul konten */
+.admin-form select{border:1px solid #ddd;background:#fafafa;padding:12px;font:400 12px "DM Sans";outline:none}.admin-form select:focus{border-color:var(--blue)}
+.admin-frame-swatch{height:45px;border:1px solid #ddd}.admin-frame-swatch.frame-blue{background:var(--blue)}.admin-frame-swatch.frame-orange{background:var(--orange)}.admin-frame-swatch.frame-green{background:var(--green)}.admin-frame-swatch.frame-pink{background:var(--pink)}
+.admin-photo{width:45px;height:45px;object-fit:cover}.admin-preview{width:100%;max-height:180px;object-fit:cover;margin-bottom:16px}
+.admin-hint{color:#777;font-size:12px;line-height:1.5;margin-bottom:18px}.admin-info{max-width:640px;margin:0}.admin-form input[type=file]{padding:9px}
+.toast.error{box-shadow:5px 5px 0 #d33}.admin-item.overview-item button{color:var(--blue)}
