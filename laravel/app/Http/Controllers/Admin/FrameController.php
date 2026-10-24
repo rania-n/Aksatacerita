@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Frame;
 use App\Models\Media;
+use App\Support\ImageUploader;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -62,7 +63,7 @@ class FrameController extends Controller
             'is_active' => $request->boolean('is_active'),
         ];
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('frames', 'public');
+            $data['image_path'] = ImageUploader::store($request->file('image'), 'frames', 1200);
         }
 
         return $data;

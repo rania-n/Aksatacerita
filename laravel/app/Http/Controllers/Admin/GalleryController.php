@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GalleryItem;
 use App\Models\Media;
+use App\Support\ImageUploader;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -24,7 +25,7 @@ class GalleryController extends Controller
         GalleryItem::create([
             'title' => trim($v['title']),
             'category' => $v['category'],
-            'image_path' => $request->file('image')->store('gallery', 'public'),
+            'image_path' => ImageUploader::store($request->file('image'), 'gallery', 1600),
             'is_active' => $request->boolean('is_active'),
             'sort_order' => (GalleryItem::max('sort_order') ?? -1) + 1,
         ]);
@@ -38,7 +39,7 @@ class GalleryController extends Controller
         $data = ['title' => trim($v['title']), 'category' => $v['category'], 'is_active' => $request->boolean('is_active')];
         if ($request->hasFile('image')) {
             Media::delete($item->image_path);
-            $data['image_path'] = $request->file('image')->store('gallery', 'public');
+            $data['image_path'] = ImageUploader::store($request->file('image'), 'gallery', 1600);
         }
         $item->update($data);
 

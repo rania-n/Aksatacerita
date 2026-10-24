@@ -290,6 +290,23 @@ class AksataTest extends TestCase
         $this->get('/')->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     }
 
+    public function test_uploaded_images_are_resized_and_compressed(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->admin());
+
+        $this->post('/admin/galeri', ['title' => 'Besar', 'category' => 'Event', 'image' => UploadedFile::fake()->image('big.jpg', 3000, 2000)])->assertRedirect('/admin/galeri');
+        $path = GalleryItem::firstOrFail()->image_path;
+        Storage::disk('public')->assertExists($path);
+        $this->assertMatchesRegularExpression('/\.(webp|jpg)$/', $path);
+        [$w, $h] = getimagesizefromstring(Storage::disk('public')->get($path));
+        $this->assertSame(1600, max($w, $h));
+
+        $this->post('/admin/frame', ['name' => 'Kecil', 'color' => 'blue', 'image' => UploadedFile::fake()->image('s.png', 400, 300)])->assertRedirect('/admin/frame');
+        [$w] = getimagesizefromstring(Storage::disk('public')->get(Frame::firstOrFail()->image_path));
+        $this->assertSame(400, $w); // gambar kecil tidak diperbesar
+    }
+
     public function test_public_disk_serves_from_public_uploads_without_storage_link(): void
     {
         $this->assertSame(public_path('uploads'), config('filesystems.disks.public.root'));

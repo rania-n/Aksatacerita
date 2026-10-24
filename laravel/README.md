@@ -8,10 +8,17 @@ cd laravel
 composer install            # hanya jika vendor/ belum ada
 cp .env.example .env && php artisan key:generate   # hanya jika .env belum ada
 php artisan migrate --seed
-php artisan serve
+php artisan serve           # PENTING: jalankan dari dalam folder laravel/, bukan folder induknya
 ```
 - Website: http://127.0.0.1:8000
 - Admin: http://127.0.0.1:8000/admin (otomatis diarahkan ke /login)
+
+### Unggah foto besar saat lokal
+`php artisan serve` memakai batas upload PHP 2 MB. Untuk foto HP yang besar, jalankan:
+```bash
+php -d upload_max_filesize=12M -d post_max_size=14M artisan serve
+```
+(Di hosting, `public/.user.ini` sudah mengatur batas 10 MB bila diizinkan penyedia hosting.)
 
 ## Login admin awal
 - Email: `admin@aksatacerita.test`
