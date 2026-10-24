@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Frame;
 use App\Models\GalleryItem;
+use App\Models\InstagramPost;
 use App\Models\Package;
 use App\Models\Setting;
 use App\Models\User;
@@ -41,7 +42,7 @@ class AksataTest extends TestCase
 
     public function test_admin_requires_login(): void
     {
-        foreach (['/admin', '/admin/paket', '/admin/frame', '/admin/galeri', '/admin/info'] as $url) {
+        foreach (['/admin', '/admin/paket', '/admin/frame', '/admin/galeri', '/admin/instagram', '/admin/info'] as $url) {
             $this->get($url)->assertNotFound(); // tamu tidak tahu area admin ada
         }
         $this->post('/admin/paket', ['name' => 'x', 'price' => '1', 'color' => 'blue'])->assertNotFound();
@@ -80,7 +81,7 @@ class AksataTest extends TestCase
     {
         $this->seed();
         $this->actingAs($this->admin());
-        foreach (['/admin', '/admin/paket', '/admin/paket/1', '/admin/frame', '/admin/frame/1', '/admin/galeri', '/admin/galeri/1', '/admin/info'] as $url) {
+        foreach (['/admin', '/admin/paket', '/admin/paket/1', '/admin/frame', '/admin/frame/1', '/admin/galeri', '/admin/galeri/1', '/admin/instagram', '/admin/info'] as $url) {
             $this->get($url)->assertOk();
         }
     }
@@ -162,6 +163,27 @@ class AksataTest extends TestCase
         $this->put('/admin/info', ['whatsapp' => '08123abc'] + $data)->assertSessionHasErrors('whatsapp');
         $this->put('/admin/info', ['maps_url' => 'javascript:alert(1)'] + $data)->assertSessionHasErrors('maps_url');
         $this->assertSame('Studio Baru', Setting::get('studio_name'));
+    }
+
+    public function test_instagram_posts_managed_in_admin_and_shown_publicly(): void
+    {
+        $this->actingAs($this->admin());
+
+        $this->post('/admin/instagram', ['url' => 'https://instagram.com/p/AbC123/?igsh=xyz', 'is_active' => 1])->assertRedirect('/admin/instagram');
+        $post = InstagramPost::firstOrFail();
+        $this->assertSame('https://www.instagram.com/p/AbC123/', $post->url);
+
+        $this->post('/admin/instagram', ['url' => 'https://www.instagram.com/p/AbC123/'])->assertSessionHasErrors('url'); // duplikat
+        $this->post('/admin/instagram', ['url' => 'https://evil.com/p/AbC123/'])->assertSessionHasErrors('url');
+        $this->post('/admin/instagram', ['url' => 'https://www.instagram.com/aksatacerita/'])->assertSessionHasErrors('url'); // profil, bukan postingan
+
+        $this->get('/')->assertSee('https://www.instagram.com/p/AbC123/', false)->assertSee('embed.js', false);
+
+        $this->put("/admin/instagram/{$post->id}", ['url' => $post->url])->assertRedirect('/admin/instagram'); // is_active tidak dicentang
+        $this->get('/')->assertDontSee('embed.js', false);
+
+        $this->delete("/admin/instagram/{$post->id}")->assertRedirect('/admin/instagram');
+        $this->assertDatabaseCount('instagram_posts', 0);
     }
 
     public function test_user_content_is_escaped(): void

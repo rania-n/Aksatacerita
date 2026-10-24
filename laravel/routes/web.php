@@ -32,6 +32,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/galeri/{item}', [Admin\GalleryController::class, 'update'])->name('gallery.update');
     Route::delete('/galeri/{item}', [Admin\GalleryController::class, 'destroy'])->name('gallery.destroy');
 
+    Route::get('/instagram/{post?}', [Admin\InstagramController::class, 'index'])->whereNumber('post')->name('instagram.index');
+    Route::post('/instagram', [Admin\InstagramController::class, 'store'])->name('instagram.store');
+    Route::put('/instagram/{post}', [Admin\InstagramController::class, 'update'])->name('instagram.update');
+    Route::delete('/instagram/{post}', [Admin\InstagramController::class, 'destroy'])->name('instagram.destroy');
+
     Route::get('/info', [Admin\SettingController::class, 'edit'])->name('settings.edit');
     Route::put('/info', [Admin\SettingController::class, 'update'])->name('settings.update');
 });

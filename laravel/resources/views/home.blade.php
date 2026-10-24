@@ -127,6 +127,14 @@
         <div class="masonry">@foreach ($gallery as $item)<figure data-cat="{{ $item->category }}"><img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy"><figcaption><span>{{ $item->category }}</span><b>{{ $item->title }}</b></figcaption></figure>@endforeach</div>
     </section>
 
+    @if ($instagram->isNotEmpty())
+    <section class="instagram-section shell" id="instagram">
+        <div class="gallery-title"><span class="kicker">FROM INSTAGRAM</span><h2>Lagi seru<br><i>di feed.</i></h2><p>Ikuti <a href="https://instagram.com/{{ $s['instagram'] }}" target="_blank" rel="noreferrer"><b>{{ '@'.$s['instagram'] }}</b></a> untuk cerita terbaru.</p></div>
+        <div class="ig-grid">@foreach ($instagram as $post)<div class="ig-item"><blockquote class="instagram-media" data-instgrm-permalink="{{ $post->url }}" data-instgrm-version="14"><a href="{{ $post->url }}" target="_blank" rel="noreferrer">Lihat di Instagram</a></blockquote></div>@endforeach</div>
+        <script async src="https://www.instagram.com/embed.js"></script>
+    </section>
+    @endif
+
     <section class="visit" id="lokasi">
         <div class="visit-map"><iframe title="Lokasi Aksatacerita" src="https://www.openstreetmap.org/export/embed.html?bbox=111.89%2C-8.09%2C111.94%2C-8.04&amp;layer=mapnik" loading="lazy"></iframe><div class="map-stamp"><x-brand /><span>YOU'RE ALMOST HERE!</span></div></div>
         <div class="visit-copy">

@@ -17,6 +17,7 @@
         ['admin.packages.index', 'Paket & Harga', 'camera', 'admin.packages.*'],
         ['admin.frames.index', 'Katalog Frame', 'sparkle', 'admin.frames.*'],
         ['admin.gallery.index', 'Galeri Momen', 'grid', 'admin.gallery.*'],
+        ['admin.instagram.index', 'Instagram', 'camera', 'admin.instagram.*'],
         ['admin.settings.edit', 'Info Studio', 'map', 'admin.settings.*'],
     ];
 @endphp

@@ -163,3 +163,7 @@ footer { background:#0d0d0d;color:white;padding:65px 0 25px; }.footer-top{displa
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after { scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; }
 }
+
+.instagram-section{padding-block:90px}
+.ig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;margin-top:40px;align-items:start}
+.ig-item{min-width:0}.ig-item .instagram-media{margin:0!important;max-width:100%!important;min-width:0!important;width:100%!important}
