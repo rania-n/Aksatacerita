@@ -22,6 +22,11 @@ Ganti sebelum online. Set `ADMIN_EMAIL` dan `ADMIN_PASSWORD` di `.env`, lalu jal
 Atau pakai tinker:
 `php artisan tinker --execute="App\Models\User::first()->update(['password'=>'PASSWORD_BARU'])"`
 
+## Akses admin
+- Tidak ada link admin di website publik. Admin masuk langsung lewat `/login`.
+- Hanya user dengan `is_admin = true` yang bisa login; tamu yang membuka `/admin` mendapat 404.
+- Tambah admin: `php artisan tinker --execute="App\Models\User::create(['name'=>'Nama','email'=>'a@b.com','password'=>'...','is_admin'=>true])"`
+
 ## Fitur admin
 Paket & Harga (tambah, ubah, hapus, sembunyikan), Katalog Frame (dengan gambar), Galeri Momen (unggah foto),
 Info Studio (alamat, jam buka, WhatsApp, Instagram, Google Maps).

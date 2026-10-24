@@ -42,9 +42,24 @@ class AksataTest extends TestCase
     public function test_admin_requires_login(): void
     {
         foreach (['/admin', '/admin/paket', '/admin/frame', '/admin/galeri', '/admin/info'] as $url) {
-            $this->get($url)->assertRedirect('/login');
+            $this->get($url)->assertNotFound(); // tamu tidak tahu area admin ada
         }
-        $this->post('/admin/paket', ['name' => 'x', 'price' => '1', 'color' => 'blue'])->assertRedirect('/login');
+        $this->post('/admin/paket', ['name' => 'x', 'price' => '1', 'color' => 'blue'])->assertNotFound();
+    }
+
+    public function test_non_admin_user_cannot_login_or_enter_admin(): void
+    {
+        $user = User::factory()->create(['password' => 'rahasia123', 'is_admin' => false]);
+
+        $this->post('/login', ['email' => $user->email, 'password' => 'rahasia123'])->assertSessionHasErrors('email');
+        $this->assertGuest();
+
+        $this->actingAs($user)->get('/admin')->assertNotFound();
+    }
+
+    public function test_public_page_has_no_admin_link(): void
+    {
+        $this->get('/')->assertOk()->assertDontSee('/admin', false)->assertDontSee('/login', false);
     }
 
     public function test_login_logout(): void

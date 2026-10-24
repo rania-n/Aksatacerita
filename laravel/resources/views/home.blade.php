@@ -16,7 +16,6 @@
             @foreach (['Beranda', 'Paket', 'Frame', 'Galeri', 'Lokasi'] as $item)
                 <a href="#{{ strtolower($item) }}">{{ $item }}</a>
             @endforeach
-            <a class="admin-link" href="{{ route('admin.dashboard') }}">Admin</a>
         </div>
         <button class="btn btn-primary nav-cta" data-open-booking>Pesan sesi <x-icon name="arrow" /></button>
         <button class="menu-btn" aria-label="Buka menu"><x-icon name="menu" /></button>

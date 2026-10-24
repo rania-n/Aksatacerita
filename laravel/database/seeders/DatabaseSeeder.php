@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         User::updateOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@aksatacerita.test')],
-            ['name' => 'Admin Aksata', 'password' => env('ADMIN_PASSWORD', 'aksata2025')],
+            ['name' => 'Admin Aksata', 'password' => env('ADMIN_PASSWORD', 'aksata2025'), 'is_admin' => true],
         );
 
         if (Package::count() === 0) {
