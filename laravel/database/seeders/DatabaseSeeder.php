@@ -19,20 +19,20 @@ class DatabaseSeeder extends Seeder
 
         if (Package::count() === 0) {
             foreach ([
-                ['Regular Photobox', '35K', 'Most Picked', 'blue', ['2 strip cetak', 'All soft files'], '15 menit', true],
-                ['Self Photo Studio', '75K', 'Slow & Sweet', 'orange', ['2 foto cetak 4R', 'All soft files'], '30 menit', false],
-                ['Passport Booth', '25K', 'Ready in 10 min', 'pink', ['6 pas foto', 'Background pilihan', 'File high-res'], '10 menit', false],
-            ] as $i => [$name, $price, $tag, $color, $features, $duration, $is_featured]) {
-                Package::create(compact('name', 'price', 'tag', 'color', 'features', 'duration', 'is_featured') + ['price_note' => 'Mulai dari', 'sort_order' => $i]);
+                ['Regular Photobox', 35000, 'Most Picked', '#0022ff', ['2 strip cetak', 'All soft files'], 15, true],
+                ['Self Photo Studio', 75000, 'Slow & Sweet', '#ff6738', ['2 foto cetak 4R', 'All soft files'], 30, false],
+                ['Passport Booth', 25000, 'Ready in 10 min', '#ff79b8', ['6 pas foto', 'Background pilihan', 'File high-res'], 10, false],
+            ] as $i => [$name, $price_amount, $tag, $color, $features, $duration_value, $is_featured]) {
+                Package::create(compact('name', 'price_amount', 'tag', 'color', 'features', 'duration_value', 'is_featured') + ['price_note' => 'Mulai dari', 'sort_order' => $i]);
             }
         }
 
         if (Frame::count() === 0) {
             foreach ([
-                ['Retro Blue', 'SIGNATURE', 'blue'],
-                ['Tangerine Day', 'NEW DROP', 'orange'],
-                ['Garden Club', 'LIMITED', 'green'],
-                ['Pink Crush', 'FAVORITE', 'pink'],
+                ['Retro Blue', 'SIGNATURE', '#0022ff'],
+                ['Tangerine Day', 'NEW DROP', '#ff6738'],
+                ['Garden Club', 'LIMITED', '#b7e433'],
+                ['Pink Crush', 'FAVORITE', '#ff79b8'],
             ] as $i => [$name, $label, $color]) {
                 Frame::create(compact('name', 'label', 'color') + ['sort_order' => $i]);
             }

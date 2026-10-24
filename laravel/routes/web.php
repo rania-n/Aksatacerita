@@ -17,25 +17,19 @@ Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')-
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', Admin\DashboardController::class)->name('dashboard');
 
-    Route::get('/paket/{package?}', [Admin\PackageController::class, 'index'])->whereNumber('package')->name('packages.index');
-    Route::post('/paket', [Admin\PackageController::class, 'store'])->name('packages.store');
-    Route::put('/paket/{package}', [Admin\PackageController::class, 'update'])->name('packages.update');
-    Route::delete('/paket/{package}', [Admin\PackageController::class, 'destroy'])->name('packages.destroy');
-
-    Route::get('/frame/{frame?}', [Admin\FrameController::class, 'index'])->whereNumber('frame')->name('frames.index');
-    Route::post('/frame', [Admin\FrameController::class, 'store'])->name('frames.store');
-    Route::put('/frame/{frame}', [Admin\FrameController::class, 'update'])->name('frames.update');
-    Route::delete('/frame/{frame}', [Admin\FrameController::class, 'destroy'])->name('frames.destroy');
-
-    Route::get('/galeri/{item?}', [Admin\GalleryController::class, 'index'])->whereNumber('item')->name('gallery.index');
-    Route::post('/galeri', [Admin\GalleryController::class, 'store'])->name('gallery.store');
-    Route::put('/galeri/{item}', [Admin\GalleryController::class, 'update'])->name('gallery.update');
-    Route::delete('/galeri/{item}', [Admin\GalleryController::class, 'destroy'])->name('gallery.destroy');
-
-    Route::get('/instagram/{post?}', [Admin\InstagramController::class, 'index'])->whereNumber('post')->name('instagram.index');
-    Route::post('/instagram', [Admin\InstagramController::class, 'store'])->name('instagram.store');
-    Route::put('/instagram/{post}', [Admin\InstagramController::class, 'update'])->name('instagram.update');
-    Route::delete('/instagram/{post}', [Admin\InstagramController::class, 'destroy'])->name('instagram.destroy');
+    foreach ([
+        ['paket', 'packages', Admin\PackageController::class, 'package'],
+        ['frame', 'frames', Admin\FrameController::class, 'frame'],
+        ['galeri', 'gallery', Admin\GalleryController::class, 'item'],
+        ['instagram', 'instagram', Admin\InstagramController::class, 'post'],
+    ] as [$path, $name, $controller, $param]) {
+        Route::get("/{$path}", [$controller, 'index'])->name("{$name}.index");
+        Route::get("/{$path}/buat", [$controller, 'create'])->name("{$name}.create");
+        Route::post("/{$path}", [$controller, 'store'])->name("{$name}.store");
+        Route::get("/{$path}/{{$param}}/ubah", [$controller, 'edit'])->whereNumber($param)->name("{$name}.edit");
+        Route::put("/{$path}/{{$param}}", [$controller, 'update'])->whereNumber($param)->name("{$name}.update");
+        Route::delete("/{$path}/{{$param}}", [$controller, 'destroy'])->whereNumber($param)->name("{$name}.destroy");
+    }
 
     Route::post('/urutan/{type}/{id}/{direction}', Admin\ReorderController::class)->whereNumber('id')->name('reorder');
 

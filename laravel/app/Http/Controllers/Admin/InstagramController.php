@@ -9,12 +9,19 @@ use Illuminate\Validation\ValidationException;
 
 class InstagramController extends Controller
 {
-    public function index(?InstagramPost $post = null)
+    public function index()
     {
-        return view('admin.instagram', [
-            'items' => InstagramPost::orderBy('sort_order')->orderBy('id')->get(),
-            'editing' => $post,
-        ]);
+        return view('admin.instagram.index', ['items' => InstagramPost::orderBy('sort_order')->orderBy('id')->get()]);
+    }
+
+    public function create()
+    {
+        return view('admin.instagram.form', ['editing' => null]);
+    }
+
+    public function edit(InstagramPost $post)
+    {
+        return view('admin.instagram.form', ['editing' => $post]);
     }
 
     public function store(Request $request)

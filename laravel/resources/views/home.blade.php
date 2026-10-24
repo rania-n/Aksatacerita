@@ -98,19 +98,7 @@
         <div class="package-grid">
             @php $featuredId = ($packages->firstWhere('is_featured', true) ?? $packages->first())?->id; @endphp
             @forelse ($packages as $i => $pkg)
-                <article class="package-card {{ $pkg->id === $featuredId ? 'active' : '' }} {{ $pkg->color }}">
-                    <div class="package-top"><span>{{ $pkg->tag }}</span><x-icon :name="$icons[$i % 3]" :size="28" /></div>
-                    <div>
-                        <h3>{{ $pkg->name }}</h3>
-                        @if ($pkg->description)<p class="package-desc">{{ $pkg->description }}</p>@endif
-                        @if ($pkg->price_note)<p>{{ $pkg->price_note }}</p>@endif
-                        <strong><small>Rp</small>{{ $pkg->price }}@if ($pkg->price_unit)<small class="package-unit"> {{ $pkg->price_unit }}</small>@endif</strong>
-                        @if ($pkg->old_price)<s class="package-old">Rp{{ $pkg->old_price }}</s>@endif
-                    </div>
-                    @if ($pkg->duration)<div class="package-duration"><x-icon name="clock" :size="14" /> {{ $pkg->duration }}</div>@endif
-                    <ul>@foreach ($pkg->features ?? [] as $f)<li><span>✓</span>{{ $f }}</li>@endforeach</ul>
-                    <button class="package-select" data-open-booking data-session="{{ $pkg->name }}">Pilih paket <x-icon name="arrow" /></button>
-                </article>
+                <x-package-card :pkg="$pkg" :active="$pkg->id === $featuredId" :icon="$icons[$i % 3]" />
             @empty
                 <p class="package-footnote" style="grid-column:1/-1">Paket segera hadir. Hubungi kami lewat WhatsApp untuk info terbaru.</p>
             @endforelse
@@ -126,7 +114,7 @@
                 @foreach ($frames as $i => $frame)
                     @php $code = str_pad($i + 1, 2, '0', STR_PAD_LEFT); @endphp
                     <article class="frame-wrap">
-                        <div class="frame-strip frame-{{ $frame->color }}">
+                        <div class="frame-strip" style="background:{{ $frame->color_hex }};color:{{ $frame->text_color }}">
                             <div class="frame-head"><b>AKSATA<br>CERITA</b><span>{{ $frame->label }}</span></div>
                             @if ($frame->image_url)
                                 <img src="{{ $frame->image_url }}" alt="Frame {{ $frame->name }}" style="height:340px">
@@ -201,7 +189,7 @@
     </section>
 
     <section class="cta-section"><div class="cta-orbit orbit-one">SAY CHEESE · SAY CHEESE ·</div><div class="cta-stars">✦　✧　✦</div><h2>Ready to make<br>your own <i>story?</i></h2><p>Nggak perlu jago pose. Datang aja, sisanya biar kami yang bikin seru.</p><button class="btn btn-light" data-open-booking><x-icon name="camera" /> Mulai ceritamu</button></section>
-    <footer><div class="shell footer-top"><x-brand :light="true" /><div><b>Explore</b><a href="#paket">Paket &amp; Harga</a>@if ($s['show_frames'] === '1' && $frames->isNotEmpty())<a href="#frame">Katalog Frame</a>@endif @if ($gallery->isNotEmpty())<a href="#galeri">Galeri Momen</a>@endif</div><div><b>Social</b><a href="https://instagram.com/{{ $s['instagram'] }}" target="_blank" rel="noreferrer">{{ '@'.$s['instagram'] }} ↗</a>@if ($s['tiktok'] !== '')<a href="https://www.tiktok.com/@{{ $s['tiktok'] }}" target="_blank" rel="noreferrer">TikTok ↗</a>@endif @if ($s['facebook'] !== '')<a href="{{ $s['facebook'] }}" target="_blank" rel="noreferrer">Facebook ↗</a>@endif<a href="{{ $waText }}" target="_blank" rel="noreferrer">WhatsApp ↗</a></div><div class="footer-note">Made for<br><i>good stories.</i></div></div><div class="shell footer-bottom"><span>© {{ date('Y') }} AKSATACERITA PHOTOBOOTH</span><span>{{ strtoupper($s['city']) }}</span></div></footer>
+    <footer><div class="shell footer-top"><x-brand :light="true" /><div><b>Explore</b><a href="#paket">Paket &amp; Harga</a>@if ($s['show_frames'] === '1' && $frames->isNotEmpty())<a href="#frame">Katalog Frame</a>@endif @if ($gallery->isNotEmpty())<a href="#galeri">Galeri Momen</a>@endif</div><div><b>Social</b><a href="https://instagram.com/{{ $s['instagram'] }}" target="_blank" rel="noreferrer">{{ '@'.$s['instagram'] }} ↗</a>@if ($s['tiktok'] !== '')<a href="https://www.tiktok.com/@{{ $s['tiktok'] }}" target="_blank" rel="noreferrer">TikTok ↗</a>@endif @if ($s['facebook'] !== '')<a href="{{ $s['facebook'] }}" target="_blank" rel="noreferrer">Facebook ↗</a>@endif<a href="{{ $waText }}" target="_blank" rel="noreferrer">WhatsApp ↗</a></div><div class="footer-note">Made for<br><i>good stories.</i></div></div><div class="shell footer-bottom"><span>© {{ date('Y') }} AKSATACERITA PHOTOBOOTH</span><span>{{ strtoupper($s['city']) }}</span></div><div class="shell"><x-credit /></div></footer>
     <a class="floating-wa" href="{{ $waText }}" target="_blank" rel="noreferrer" aria-label="Chat WhatsApp"><x-icon name="whatsapp" /></a>
     <div class="booking-backdrop" data-close-booking></div>
     <aside class="booking-drawer" aria-hidden="true">

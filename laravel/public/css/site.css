@@ -173,3 +173,6 @@ footer { background:#0d0d0d;color:white;padding:65px 0 25px; }.footer-top{displa
 .package-duration{display:flex;align-items:center;gap:6px;font-size:12px;margin:14px 0 4px;opacity:.8}
 .booking-date{width:100%;border:1px solid #ddd;padding:12px;font:inherit;margin-bottom:16px}
 .booking-date[hidden]{display:none}
+[hidden]{display:none!important}
+.credit{margin:0;font:500 10px "Space Grotesk";letter-spacing:.3px;line-height:1.5}.credit b{font-weight:700}.credit-mark{color:var(--orange);margin-right:4px}
+.credit-footer{display:flex;justify-content:center;align-items:center;gap:6px;text-align:center;color:#8a8a8a;border-top:1px solid #222;margin-top:20px;padding-top:18px}.credit-footer b{color:#e8e8e8}

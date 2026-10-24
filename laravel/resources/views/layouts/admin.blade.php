@@ -32,6 +32,7 @@
             @endforeach
         </nav>
         <a class="back-site" href="{{ route('home') }}" target="_blank">← Lihat website</a>
+        <x-credit variant="admin" />
     </aside>
     <div class="admin-main">
         <header>
@@ -44,8 +45,12 @@
         </header>
         @if (session('ok'))<div class="toast">✓ {{ session('ok') }}</div>@endif
         @if ($errors->any())<div class="flash err">Periksa lagi isian form di bawah.</div>@endif
-        <div class="admin-content">@yield('content')</div>
+        <div class="admin-content">
+            @hasSection('desc')<p class="page-desc">@yield('desc')</p>@endif
+            @yield('content')
+        </div>
     </div>
 </div>
+<script src="{{ asset('js/admin-form.js') }}" defer></script>
 </body>
 </html>

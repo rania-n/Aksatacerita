@@ -11,11 +11,26 @@ use Illuminate\Validation\Rule;
 
 class GalleryController extends Controller
 {
-    public function index(?GalleryItem $item = null)
+    public function index()
     {
-        return view('admin.gallery', [
-            'items' => GalleryItem::orderBy('sort_order')->orderBy('id')->get(),
+        return view('admin.gallery.index', ['items' => GalleryItem::orderBy('sort_order')->orderBy('id')->get()]);
+    }
+
+    public function create()
+    {
+        return $this->form(null);
+    }
+
+    public function edit(GalleryItem $item)
+    {
+        return $this->form($item);
+    }
+
+    private function form(?GalleryItem $item)
+    {
+        return view('admin.gallery.form', [
             'editing' => $item,
+            'categories' => array_values(array_unique(array_filter([...GalleryItem::categories(), $item?->category]))),
         ]);
     }
 

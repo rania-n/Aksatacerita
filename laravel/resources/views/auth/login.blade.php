@@ -22,6 +22,7 @@
         <label class="remember"><input type="checkbox" name="remember" value="1"> Ingat saya</label>
         <button class="btn btn-primary" type="submit">Masuk <x-icon name="arrow" /></button>
         <a class="back" href="{{ route('home') }}">← Kembali ke website</a>
+        <x-credit variant="login" />
     </form>
 </main>
 </body>

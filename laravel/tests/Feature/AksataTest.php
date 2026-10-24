@@ -25,9 +25,9 @@ class AksataTest extends TestCase
 
     public function test_public_page_shows_database_content(): void
     {
-        Package::create(['name' => 'Paket Uji', 'price' => '99K', 'tag' => 'Baru', 'color' => 'blue', 'features' => ['Satu', 'Dua']]);
-        Package::create(['name' => 'Paket Tersembunyi', 'price' => '1K', 'color' => 'pink', 'is_active' => false]);
-        Frame::create(['name' => 'Frame Uji', 'label' => 'NEW', 'color' => 'green']);
+        Package::create(['name' => 'Paket Uji', 'price_amount' => 99000, 'tag' => 'Baru', 'color' => '#0022ff', 'features' => ['Satu', 'Dua']]);
+        Package::create(['name' => 'Paket Tersembunyi', 'price_amount' => 1000, 'color' => '#ff79b8', 'is_active' => false]);
+        Frame::create(['name' => 'Frame Uji', 'label' => 'NEW', 'color' => '#b7e433']);
         GalleryItem::create(['title' => 'Foto Uji', 'category' => 'Event', 'image_path' => 'https://example.com/a.jpg']);
 
         $this->get('/')->assertOk()
@@ -46,7 +46,7 @@ class AksataTest extends TestCase
         foreach (['/admin', '/admin/paket', '/admin/frame', '/admin/galeri', '/admin/instagram', '/admin/info'] as $url) {
             $this->get($url)->assertNotFound(); // tamu tidak tahu area admin ada
         }
-        $this->post('/admin/paket', ['name' => 'x', 'price' => '1', 'color' => 'blue'])->assertNotFound();
+        $this->post('/admin/paket', ['name' => 'x', 'price' => '1', 'color' => '#0022ff'])->assertNotFound();
     }
 
     public function test_non_admin_user_cannot_login_or_enter_admin(): void
@@ -82,7 +82,7 @@ class AksataTest extends TestCase
     {
         $this->seed();
         $this->actingAs($this->admin());
-        foreach (['/admin', '/admin/paket', '/admin/paket/1', '/admin/frame', '/admin/frame/1', '/admin/galeri', '/admin/galeri/1', '/admin/instagram', '/admin/info'] as $url) {
+        foreach (['/admin', '/admin/paket', '/admin/paket/buat', '/admin/paket/1/ubah', '/admin/frame', '/admin/frame/buat', '/admin/frame/1/ubah', '/admin/galeri', '/admin/galeri/buat', '/admin/galeri/1/ubah', '/admin/instagram', '/admin/instagram/buat', '/admin/akun', '/admin/info'] as $url) {
             $this->get($url)->assertOk();
         }
     }
@@ -91,23 +91,55 @@ class AksataTest extends TestCase
     {
         $this->actingAs($this->admin());
 
-        $this->post('/admin/paket', ['name' => 'Bestie', 'price' => 'Rp 50K', 'color' => 'orange', 'features' => "15 menit\nSoft files, Cetak 4R", 'is_active' => 1])
+        $this->post('/admin/paket', ['name' => 'Bestie', 'price' => 'Rp 50.000', 'price_style' => 'k', 'duration_unit' => 'menit', 'duration_value' => 15, 'color' => '#ff6738', 'features' => "15 menit\nSoft files, Cetak 4R", 'is_active' => 1])
             ->assertRedirect('/admin/paket');
         $p = Package::firstOrFail();
-        $this->assertSame('50K', $p->price);
+        $this->assertSame(50000, $p->price_amount);
+        $this->assertSame('50K', $p->price_text);
+        $this->assertSame('15 menit', $p->duration_text);
         $this->assertSame(['15 menit', 'Soft files', 'Cetak 4R'], $p->features);
 
-        $this->put("/admin/paket/{$p->id}", ['name' => 'Bestie Plus', 'price' => '60K', 'color' => 'pink', 'features' => 'Satu'])->assertRedirect('/admin/paket');
+        $this->put("/admin/paket/{$p->id}", ['name' => 'Bestie Plus', 'price' => '60500', 'price_style' => 'k', 'duration_unit' => 'detik', 'duration_value' => 90, 'color' => '#ff79b8', 'features' => 'Satu'])->assertRedirect('/admin/paket');
         $p->refresh();
         $this->assertSame('Bestie Plus', $p->name);
+        $this->assertSame('60.500', $p->price_text); // bukan ribuan pas -> ditulis lengkap
+        $this->assertSame('90 detik', $p->duration_text);
         $this->assertFalse($p->is_active); // checkbox tidak dicentang = disembunyikan
 
         $this->get('/')->assertDontSee('Bestie Plus');
 
-        $this->post('/admin/paket', ['name' => '', 'price' => '', 'color' => 'merah'])->assertSessionHasErrors(['name', 'price', 'color']);
+        $this->post('/admin/paket', ['name' => '', 'price' => '', 'price_style' => 'x', 'duration_unit' => 'jam', 'color' => 'merah'])->assertSessionHasErrors(['name', 'price', 'price_style', 'duration_unit', 'color']);
+        $this->post('/admin/paket', ['name' => 'Z', 'price' => '1000', 'price_style' => 'k', 'duration_unit' => 'menit', 'old_price' => '500', 'color' => '#0022ff'])->assertSessionHasErrors('old_price');
+        $this->post('/admin/paket', ['name' => 'Z', 'price' => '1000', 'price_style' => 'k', 'duration_unit' => 'menit', 'duration_value' => 0, 'color' => '#0022ff'])->assertSessionHasErrors('duration_value');
 
         $this->delete("/admin/paket/{$p->id}")->assertRedirect('/admin/paket');
         $this->assertDatabaseCount('packages', 0);
+    }
+
+    public function test_money_and_color_helpers(): void
+    {
+        $this->assertSame('35K', \App\Support\Money::format(35000, 'k'));
+        $this->assertSame('35.000', \App\Support\Money::format(35000, 'rp'));
+        $this->assertSame('1.500', \App\Support\Money::format(1500, 'k'));
+        $this->assertSame('500', \App\Support\Money::format(500, 'k'));
+        $this->assertSame('0', \App\Support\Money::format(0, 'k'));
+
+        $this->assertSame('#0022ff', \App\Support\Palette::normalize('blue'));
+        $this->assertSame('#abcdef', \App\Support\Palette::normalize('#ABCDEF'));
+        $this->assertSame('#0022ff', \App\Support\Palette::normalize('javascript:alert(1)'));
+        $this->assertSame('#ffffff', \App\Support\Palette::textOn('#0022ff'));
+        $this->assertSame('#111111', \App\Support\Palette::textOn('#b7e433'));
+    }
+
+    public function test_custom_colors_become_swatches_and_render_publicly(): void
+    {
+        $this->actingAs($this->admin());
+        $this->post('/admin/paket', ['name' => 'Ungu Kustom', 'price' => '20000', 'price_style' => 'rp', 'duration_unit' => 'menit', 'color' => '#12AB34', 'is_active' => 1])->assertRedirect('/admin/paket');
+
+        $this->assertSame('#12ab34', Package::firstOrFail()->color);
+        $this->assertContains('#12ab34', \App\Support\Palette::swatches());
+        $this->get('/admin/frame/buat')->assertOk()->assertSee('data-value="#12ab34"', false);
+        $this->get('/')->assertSee('--card: #12ab34', false)->assertSee('20.000');
     }
 
     public function test_gallery_upload_replace_delete(): void
@@ -138,12 +170,12 @@ class AksataTest extends TestCase
         Storage::fake('public');
         $this->actingAs($this->admin());
 
-        $this->post('/admin/frame', ['name' => 'Retro', 'label' => 'new', 'color' => 'green', 'image' => UploadedFile::fake()->image('f.png'), 'is_active' => 1])->assertRedirect('/admin/frame');
+        $this->post('/admin/frame', ['name' => 'Retro', 'label' => 'new', 'color' => '#b7e433', 'image' => UploadedFile::fake()->image('f.png'), 'is_active' => 1])->assertRedirect('/admin/frame');
         $f = Frame::firstOrFail();
         $this->assertSame('NEW', $f->label);
         Storage::disk('public')->assertExists($f->image_path);
 
-        $this->put("/admin/frame/{$f->id}", ['name' => 'Retro 2', 'color' => 'blue', 'is_active' => 1])->assertRedirect('/admin/frame');
+        $this->put("/admin/frame/{$f->id}", ['name' => 'Retro 2', 'color' => '#0022ff', 'is_active' => 1])->assertRedirect('/admin/frame');
         $this->assertSame('Retro 2', $f->fresh()->name);
         Storage::disk('public')->assertExists($f->image_path); // gambar lama tetap kalau tidak diganti
 
@@ -216,16 +248,42 @@ class AksataTest extends TestCase
     public function test_package_extra_fields_and_single_featured(): void
     {
         $this->actingAs($this->admin());
-        $this->post('/admin/paket', ['name' => 'A', 'description' => 'Deskripsi A', 'duration' => '20 menit', 'price_note' => 'Hanya', 'price' => 'Rp 50.000', 'price_unit' => '/ sesi', 'old_price' => 'Rp 70.000', 'color' => 'blue', 'is_featured' => 1, 'is_active' => 1])->assertRedirect('/admin/paket');
-        $this->post('/admin/paket', ['name' => 'B', 'price' => '10K', 'color' => 'pink', 'is_featured' => 1, 'is_active' => 1])->assertRedirect('/admin/paket');
+        $base = ['price_style' => 'rp', 'duration_unit' => 'menit', 'color' => '#0022ff', 'is_active' => 1];
+        $this->post('/admin/paket', $base + ['name' => 'A', 'description' => 'Deskripsi A', 'duration_value' => 20, 'price_note' => 'Hanya', 'price' => 'Rp 50.000', 'price_unit' => '/ sesi', 'old_price' => 'Rp 70.000', 'is_featured' => 1])->assertRedirect('/admin/paket');
+        $this->post('/admin/paket', $base + ['name' => 'B', 'price' => '10000', 'is_featured' => 1])->assertRedirect('/admin/paket');
 
         $a = Package::where('name', 'A')->firstOrFail();
-        $this->assertSame('50.000', $a->price);
-        $this->assertSame('70.000', $a->old_price);
+        $this->assertSame(50000, $a->price_amount);
+        $this->assertSame(70000, $a->old_price_amount);
         $this->assertFalse($a->is_featured); // dilepas karena B jadi unggulan
         $this->assertTrue(Package::where('name', 'B')->first()->is_featured);
 
-        $this->get('/')->assertSee('Deskripsi A')->assertSee('20 menit')->assertSee('/ sesi')->assertSee('Rp70.000')->assertSee('Hanya');
+        $this->get('/')->assertSee('Deskripsi A')->assertSee('20 menit')->assertSee('/ sesi')->assertSee('Rp70.000')->assertSee('50.000')->assertSee('Hanya');
+    }
+
+    public function test_label_suggestions_include_previously_used_labels(): void
+    {
+        $this->actingAs($this->admin());
+        Package::create(['name' => 'A', 'price_amount' => 1000, 'tag' => 'Super Hemat Banget', 'color' => '#0022ff']);
+        $this->get('/admin/paket/buat')->assertOk()->assertSee('Super Hemat Banget')->assertSee('Most Picked');
+    }
+
+    public function test_credit_shows_on_site_admin_and_login(): void
+    {
+        $this->get('/')->assertSee('Siswa RPL SMKN 1 Boyolangu');
+        $this->get('/login')->assertSee('Siswa RPL SMKN 1 Boyolangu');
+        $this->actingAs($this->admin())->get('/admin')->assertSee('Siswa RPL SMKN 1 Boyolangu');
+
+        config(['aksata.credit.names' => ['Rania', 'Budi']]);
+        $this->get('/')->assertSee('Rania, Budi');
+    }
+
+    public function test_required_fields_are_marked_in_forms(): void
+    {
+        $this->actingAs($this->admin());
+        foreach (['/admin/paket/buat', '/admin/frame/buat', '/admin/galeri/buat', '/admin/instagram/buat', '/admin/info', '/admin/akun'] as $url) {
+            $this->get($url)->assertOk()->assertSee('class="req"', false);
+        }
     }
 
     public function test_reorder_moves_items_and_ignores_edges(): void
@@ -302,7 +360,7 @@ class AksataTest extends TestCase
         [$w, $h] = getimagesizefromstring(Storage::disk('public')->get($path));
         $this->assertSame(1600, max($w, $h));
 
-        $this->post('/admin/frame', ['name' => 'Kecil', 'color' => 'blue', 'image' => UploadedFile::fake()->image('s.png', 400, 300)])->assertRedirect('/admin/frame');
+        $this->post('/admin/frame', ['name' => 'Kecil', 'color' => '#0022ff', 'image' => UploadedFile::fake()->image('s.png', 400, 300)])->assertRedirect('/admin/frame');
         [$w] = getimagesizefromstring(Storage::disk('public')->get(Frame::firstOrFail()->image_path));
         $this->assertSame(400, $w); // gambar kecil tidak diperbesar
     }
@@ -318,7 +376,7 @@ class AksataTest extends TestCase
     {
         $this->seed();
         $this->actingAs($this->admin());
-        Package::create(['name' => "Mom's \"Best\" Pack", 'price' => '1K', 'color' => 'blue']);
+        Package::create(['name' => "Mom's \"Best\" Pack", 'price_amount' => 1000, 'color' => '#0022ff']);
         GalleryItem::create(['title' => "It's us", 'category' => 'Event', 'image_path' => "https://example.com/a'b.jpg"]);
         $this->get('/admin/paket')->assertOk()->assertDontSee("confirm('Hapus paket Mom's", false);
         $html = $this->get('/')->assertOk()->getContent();
@@ -348,7 +406,7 @@ class AksataTest extends TestCase
 
     public function test_user_content_is_escaped(): void
     {
-        Package::create(['name' => '<script>alert(1)</script>', 'price' => '1K', 'color' => 'blue']);
+        Package::create(['name' => '<script>alert(1)</script>', 'price_amount' => 1000, 'color' => '#0022ff']);
         $this->get('/')->assertDontSee('<script>alert(1)</script>', false);
     }
 }
