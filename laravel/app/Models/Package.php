@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'description', 'duration_value', 'duration_unit', 'price_note', 'price_amount', 'price_style', 'old_price_amount', 'price_unit', 'tag', 'color', 'features', 'is_featured', 'sort_order', 'is_active'])]
+#[Fillable(['name', 'description', 'duration_value', 'duration_unit', 'price_note', 'price_amount', 'price_style', 'old_price_amount', 'tag', 'color', 'features', 'is_featured', 'sort_order', 'is_active'])]
 class Package extends Model
 {
     use HasFactory;

@@ -1,12 +1,12 @@
 @props(['pkg', 'active' => false, 'icon' => 'camera', 'preview' => false])
 {{-- Kartu paket: dipakai di website dan di pratinjau admin (data-p = titik sambung pratinjau langsung) --}}
 <article class="package-card {{ $active ? 'active' : '' }}" style="--card: {{ $pkg->color_hex }}">
-    <div class="package-top"><span data-p="tag">{{ $pkg->tag }}</span><x-icon :name="$icon" :size="28" /></div>
+    <div class="package-top"><span data-p="tag" {{ $pkg->tag ? '' : 'hidden' }}>{{ $pkg->tag }}</span><x-icon :name="$icon" :size="28" /></div>
     <div>
         <h3 data-p="name">{{ $pkg->name }}</h3>
         @if ($preview || $pkg->description)<p class="package-desc" data-p="description" {{ $pkg->description ? '' : 'hidden' }}>{{ $pkg->description }}</p>@endif
         @if ($preview || $pkg->price_note)<p data-p="note" {{ $pkg->price_note ? '' : 'hidden' }}>{{ $pkg->price_note }}</p>@endif
-        <strong><small>Rp</small><span data-p="price">{{ $pkg->price_text }}</span>@if ($preview || $pkg->price_unit)<small class="package-unit" data-p="unit" {{ $pkg->price_unit ? '' : 'hidden' }}> {{ $pkg->price_unit }}</small>@endif</strong>
+        <strong><small>Rp</small><span data-p="price">{{ $pkg->price_text }}</span></strong>
         @if ($preview || $pkg->old_price_text)<s class="package-old" data-p="old" {{ $pkg->old_price_text ? '' : 'hidden' }}>Rp{{ $pkg->old_price_text }}</s>@endif
     </div>
     @if ($preview || $pkg->duration_text)<div class="package-duration" data-p="duration" {{ $pkg->duration_text ? '' : 'hidden' }}><x-icon name="clock" :size="14" /> <span data-p="duration-text">{{ $pkg->duration_text }}</span></div>@endif

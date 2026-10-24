@@ -15,7 +15,7 @@
 
         <div class="field">
             <span class="lbl">Durasi sesi</span>
-            <div class="inline">
+            <div class="inline nowrap">
                 <input type="number" name="duration_value" value="{{ old('duration_value', $p->duration_value) }}" min="1" max="999" inputmode="numeric" placeholder="15" aria-label="Lama sesi">
                 <x-seg name="duration_unit" :options="\App\Models\Package::DURATION_UNITS" :value="$p->duration_unit" />
             </div>
@@ -23,38 +23,31 @@
             @error('duration_value')<span class="error">{{ $message }}</span>@enderror
         </div>
 
-        <label>Harga <i class="req">*</i>
-            <span class="input-group"><b>Rp</b><input type="number" name="price" id="f-price" value="{{ old('price', $p->price_amount) }}" required min="0" step="500" inputmode="numeric" placeholder="35000"></span>
-            <span class="hint">Ketik angkanya saja, contoh 35000.</span>@error('price')<span class="error">{{ $message }}</span>@enderror
-        </label>
-
         <div class="field">
-            <span class="lbl">Cara menulis harga</span>
-            <x-seg name="price_style" :options="['k' => $p->price_amount ? 'Rp'.\App\Support\Money::format($p->price_amount, 'k') : 'Rp35K', 'rp' => $p->price_amount ? 'Rp'.\App\Support\Money::format($p->price_amount, 'rp') : 'Rp35.000']" :value="$p->price_style" />
-            <span class="hint">Pilih salah satu. Contoh tulisannya ikut berubah sesuai harga yang diketik.</span>
+            <span class="lbl">Harga <i class="req">*</i></span>
+            <div class="inline nowrap">
+                <span class="input-group"><b>Rp</b><input type="number" name="price" id="f-price" value="{{ old('price', $p->price_amount) }}" required min="0" step="500" inputmode="numeric" placeholder="35000" aria-label="Harga"></span>
+                <x-seg name="price_style" :options="['k' => $p->price_amount ? 'Rp'.\App\Support\Money::format($p->price_amount, 'k') : 'Rp35K', 'rp' => $p->price_amount ? 'Rp'.\App\Support\Money::format($p->price_amount, 'rp') : 'Rp35.000']" :value="$p->price_style" />
+            </div>
+            <span class="hint">Ketik angkanya saja (contoh 35000), lalu pilih cara menulisnya. Contoh tulisan ikut berubah sesuai angka.</span>
+            @error('price')<span class="error">{{ $message }}</span>@enderror
         </div>
-
-        <label>Teks di atas harga<input name="price_note" id="f-note" value="{{ old('price_note', $p->price_note) }}" maxlength="30" placeholder="Mulai dari"></label>
-        <x-chips target="f-note" :items="$noteSuggestions" />
-        <div class="spacer"></div>
-
-        <label>Satuan harga<input name="price_unit" id="f-unit" value="{{ old('price_unit', $p->price_unit) }}" maxlength="20" placeholder="/ sesi"></label>
-        <x-chips target="f-unit" :items="$unitSuggestions" />
-        <div class="spacer"></div>
 
         <label>Harga coret (promo)
             <span class="input-group"><b>Rp</b><input type="number" name="old_price" value="{{ old('old_price', $p->old_price_amount) }}" min="0" step="500" inputmode="numeric" placeholder="75000"></span>
             <span class="hint">Isi bila sedang diskon, harus lebih besar dari harga. Tampil dicoret di bawah harga.</span>@error('old_price')<span class="error">{{ $message }}</span>@enderror
         </label>
 
-        <label>Label<input name="tag" id="f-tag" value="{{ old('tag', $p->tag) }}" maxlength="40" placeholder="Contoh: Most Picked"><span class="hint">Klik salah satu di bawah, atau ketik sendiri. Label yang pernah Anda ketik akan muncul di sini otomatis.</span></label>
-        <x-chips target="f-tag" :items="$tagSuggestions" />
-        <div class="spacer"></div>
+        <label>Teks di atas harga<input name="price_note" id="f-note" value="{{ old('price_note', $p->price_note) }}" maxlength="30" placeholder="Mulai dari"></label>
+        <x-chips target="f-note" list="package_note" :items="$noteOptions" />
+
+        <label>Label<input name="tag" id="f-tag" value="{{ old('tag', $p->tag) }}" maxlength="40" placeholder="Contoh: Most Picked"><span class="hint">Klik pilihan di bawah atau ketik sendiri. Yang Anda ketik akan tersimpan jadi pilihan baru. Tekan × untuk menghapus pilihan.</span></label>
+        <x-chips target="f-tag" list="package_tag" :items="$tagOptions" />
 
         <div class="field">
             <span class="lbl">Warna kartu <i class="req">*</i></span>
             <x-swatches name="color" :value="$p->color" :swatches="$swatches" />
-            <span class="hint">Klik warna. Tombol "+" untuk memilih warna lain. Warna baru akan tersimpan di daftar.</span>
+            <span class="hint">Klik warna. Tombol "+" untuk memilih warna lain.</span>
             @error('color')<span class="error">{{ $message }}</span>@enderror
         </div>
 

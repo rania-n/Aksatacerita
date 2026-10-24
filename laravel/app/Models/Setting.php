@@ -41,6 +41,10 @@ class Setting extends Model
         'show_booth' => '1',
         'show_instagram' => '1',
         'gallery_categories' => 'Event, Wisuda, Couple, Bestie',
+        // Pilihan cepat di form admin (bisa dihapus dan bertambah otomatis)
+        'options_package_tag' => 'Most Picked, Best Seller, Promo, Baru, Hemat, Slow & Sweet, Ready in 10 min',
+        'options_package_note' => 'Mulai dari, Hanya, Per sesi',
+        'options_frame_label' => 'NEW DROP, SIGNATURE, LIMITED, FAVORITE, BEST SELLER',
         // Google
         'meta_title' => 'Aksata Cerita — Photobooth Studio Tulungagung',
         'meta_description' => 'Aksata Cerita, photobooth studio di Tulungagung. Pilih paket, pilih frame, abadikan ceritamu.',
@@ -86,6 +90,26 @@ class Setting extends Model
             static::DEFAULTS,
             array_map(fn ($v) => (string) $v, static::all()->pluck('value', 'key')->all()),
         );
+    }
+
+    /** Tambah ke daftar pilihan (abaikan kosong atau yang sudah ada, tanpa membedakan huruf besar/kecil). */
+    public static function addToList(string $key, ?string $value): void
+    {
+        $value = trim((string) $value);
+        $items = static::list($key);
+
+        if ($value === '' || in_array(mb_strtolower($value), array_map('mb_strtolower', $items), true)) {
+            return;
+        }
+
+        static::put([$key => implode(', ', [...$items, $value])]);
+    }
+
+    public static function removeFromList(string $key, string $value): void
+    {
+        $items = array_filter(static::list($key), fn ($item) => mb_strtolower($item) !== mb_strtolower(trim($value)));
+
+        static::put([$key => implode(', ', $items)]);
     }
 
     /** @param array<string, string|null> $values */

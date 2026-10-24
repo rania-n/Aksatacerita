@@ -138,7 +138,7 @@ class AksataTest extends TestCase
 
         $this->assertSame('#12ab34', Package::firstOrFail()->color);
         $this->assertContains('#12ab34', \App\Support\Palette::swatches());
-        $this->get('/admin/frame/buat')->assertOk()->assertSee('data-value="#12ab34"', false);
+        $this->get('/admin/paket/buat')->assertOk()->assertSee('data-value="#12ab34"', false);
         $this->get('/')->assertSee('--card: #12ab34', false)->assertSee('20.000');
     }
 
@@ -159,7 +159,7 @@ class AksataTest extends TestCase
 
         $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Event'])->assertSessionHasErrors('image');
         $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Event', 'image' => UploadedFile::fake()->create('virus.php', 10)])->assertSessionHasErrors('image');
-        $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Hacker', 'image' => UploadedFile::fake()->image('c.jpg')])->assertSessionHasErrors('category');
+        $this->post('/admin/galeri', ['title' => 'x', 'category' => '', 'image' => UploadedFile::fake()->image('c.jpg')])->assertSessionHasErrors('category');
 
         $this->delete("/admin/galeri/{$item->id}")->assertRedirect('/admin/galeri');
         Storage::disk('public')->assertMissing($item->image_path);
@@ -249,7 +249,7 @@ class AksataTest extends TestCase
     {
         $this->actingAs($this->admin());
         $base = ['price_style' => 'rp', 'duration_unit' => 'menit', 'color' => '#0022ff', 'is_active' => 1];
-        $this->post('/admin/paket', $base + ['name' => 'A', 'description' => 'Deskripsi A', 'duration_value' => 20, 'price_note' => 'Hanya', 'price' => 'Rp 50.000', 'price_unit' => '/ sesi', 'old_price' => 'Rp 70.000', 'is_featured' => 1])->assertRedirect('/admin/paket');
+        $this->post('/admin/paket', $base + ['name' => 'A', 'description' => 'Deskripsi A', 'duration_value' => 20, 'price_note' => 'Hanya', 'price' => 'Rp 50.000', 'old_price' => 'Rp 70.000', 'is_featured' => 1])->assertRedirect('/admin/paket');
         $this->post('/admin/paket', $base + ['name' => 'B', 'price' => '10000', 'is_featured' => 1])->assertRedirect('/admin/paket');
 
         $a = Package::where('name', 'A')->firstOrFail();
@@ -258,14 +258,103 @@ class AksataTest extends TestCase
         $this->assertFalse($a->is_featured); // dilepas karena B jadi unggulan
         $this->assertTrue(Package::where('name', 'B')->first()->is_featured);
 
-        $this->get('/')->assertSee('Deskripsi A')->assertSee('20 menit')->assertSee('/ sesi')->assertSee('Rp70.000')->assertSee('50.000')->assertSee('Hanya');
+        $this->get('/')->assertSee('Deskripsi A')->assertSee('20 menit')->assertSee('Rp70.000')->assertSee('50.000')->assertSee('Hanya');
     }
 
-    public function test_label_suggestions_include_previously_used_labels(): void
+    public function test_quick_options_learn_from_saved_values_and_can_be_deleted(): void
     {
         $this->actingAs($this->admin());
-        Package::create(['name' => 'A', 'price_amount' => 1000, 'tag' => 'Super Hemat Banget', 'color' => '#0022ff']);
-        $this->get('/admin/paket/buat')->assertOk()->assertSee('Super Hemat Banget')->assertSee('Most Picked');
+        $base = ['price' => '1000', 'price_style' => 'k', 'duration_unit' => 'menit', 'color' => '#0022ff'];
+
+        $this->get('/admin/paket/buat')->assertOk()->assertSee('Most Picked')->assertSee('Mulai dari');
+        $this->post('/admin/paket', $base + ['name' => 'A', 'tag' => 'Super Hemat Banget', 'price_note' => 'Cuma'])->assertRedirect('/admin/paket');
+        $this->get('/admin/paket/buat')->assertSee('Super Hemat Banget')->assertSee('Cuma');
+
+        $this->deleteJson('/admin/pilihan/package_tag', ['value' => 'Super Hemat Banget'])->assertNoContent();
+        $this->deleteJson('/admin/pilihan/package_tag', ['value' => 'promo'])->assertNoContent(); // tanpa membedakan huruf
+        $this->get('/admin/paket/buat')->assertDontSee('Super Hemat Banget')->assertDontSee('data-value="Promo"', false)->assertSee('Most Picked');
+
+        // paket yang sudah memakai label tetap menampilkannya
+        $this->assertSame('Super Hemat Banget', Package::firstOrFail()->tag);
+
+        $this->deleteJson('/admin/pilihan/bukan_daftar', ['value' => 'x'])->assertNotFound();
+        $this->deleteJson('/admin/pilihan/package_tag', [])->assertStatus(422);
+    }
+
+    public function test_option_delete_requires_admin(): void
+    {
+        $this->deleteJson('/admin/pilihan/package_tag', ['value' => 'Promo'])->assertUnauthorized();
+        $this->assertContains('Promo', Setting::list('options_package_tag'));
+    }
+
+    public function test_frame_needs_photo_on_create_and_has_no_color_field(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->admin());
+
+        $this->get('/admin/frame/buat')->assertOk()->assertDontSee('Warna frame')->assertSee('class="req"', false);
+        $this->post('/admin/frame', ['name' => 'Tanpa Foto'])->assertSessionHasErrors('image');
+
+        $this->post('/admin/frame', ['name' => 'Dengan Foto', 'label' => 'baru', 'is_active' => 1, 'image' => UploadedFile::fake()->image('f.png', 300, 900)])->assertRedirect('/admin/frame');
+        $frame = Frame::firstOrFail();
+        $this->assertSame('BARU', $frame->label);
+        $this->assertContains('BARU', Setting::list('options_frame_label'));
+
+        $this->get('/')->assertSee('class="frame-photo"', false)->assertSee('BARU');
+    }
+
+    public function test_password_reset_by_email(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $user = User::factory()->create(['email' => 'boss@aksata.test', 'password' => 'lamaaaaa1']);
+
+        $this->get('/login')->assertSee('Lupa password?');
+        $this->get('/lupa-password')->assertOk();
+
+        // jawaban sama untuk email terdaftar atau tidak, supaya email admin tidak bisa ditebak
+        $same = 'Jika email terdaftar';
+        $this->post('/lupa-password', ['email' => 'tidak@ada.test'])->assertSessionHas('status', fn ($m) => str_contains($m, $same));
+        \Illuminate\Support\Facades\Notification::assertNothingSent();
+        $this->post('/lupa-password', ['email' => $user->email])->assertSessionHas('status', fn ($m) => str_contains($m, $same));
+
+        $token = null;
+        \Illuminate\Support\Facades\Notification::assertSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class, function ($n) use (&$token) {
+            $token = $n->token;
+
+            return true;
+        });
+
+        $this->get("/reset-password/{$token}?email=".urlencode($user->email))->assertOk()->assertSee($user->email);
+        $this->post('/reset-password', ['token' => 'salah', 'email' => $user->email, 'password' => 'passwordbaru1', 'password_confirmation' => 'passwordbaru1'])->assertSessionHasErrors('email');
+        $this->post('/reset-password', ['token' => $token, 'email' => $user->email, 'password' => 'pendek', 'password_confirmation' => 'pendek'])->assertSessionHasErrors('password');
+        $this->post('/reset-password', ['token' => $token, 'email' => $user->email, 'password' => 'passwordbaru1', 'password_confirmation' => 'passwordbaru1'])->assertRedirect('/login');
+
+        $this->assertTrue(Hash::check('passwordbaru1', $user->fresh()->password));
+        $this->post('/login', ['email' => $user->email, 'password' => 'passwordbaru1'])->assertRedirect('/admin');
+    }
+
+    public function test_admin_can_send_password_link_to_own_email(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $user = $this->admin();
+
+        $this->actingAs($user)->get('/admin/akun')->assertOk()->assertSee('Kirim link ke email saya');
+        $this->post('/admin/akun/link-password')->assertSessionHas('ok');
+        \Illuminate\Support\Facades\Notification::assertSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class);
+    }
+
+    public function test_password_reset_email_is_in_indonesian(): void
+    {
+        $user = User::factory()->create();
+        $mail = (new \Illuminate\Auth\Notifications\ResetPassword('tok'))->toMail($user);
+        $this->assertStringContainsString('Link Ganti Password', $mail->subject);
+        $this->assertStringContainsString('Anda menerima email ini', $mail->introLines[0]);
+    }
+
+    public function test_admin_navigation_has_labels_for_every_screen_size(): void
+    {
+        $this->actingAs($this->admin());
+        $this->get('/admin')->assertOk()->assertSee('rail-toggle', false)->assertSee('nav-short', false)->assertSee('Pengaturan')->assertSee('csrf-token', false);
     }
 
     public function test_credit_shows_on_site_admin_and_login(): void
@@ -306,20 +395,28 @@ class AksataTest extends TestCase
         $this->post("/admin/urutan/paket/{$a->id}/sideways")->assertNotFound();
     }
 
-    public function test_gallery_categories_come_from_settings(): void
+    public function test_gallery_categories_can_be_added_and_removed_from_the_form(): void
     {
         Storage::fake('public');
         $this->actingAs($this->admin());
-        $this->put('/admin/info', $this->settingsPayload(['gallery_categories' => 'Event, Prewed']))->assertRedirect('/admin/info');
 
-        $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Prewed', 'image' => UploadedFile::fake()->image('a.jpg')])->assertRedirect('/admin/galeri');
-        $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Couple', 'image' => UploadedFile::fake()->image('a.jpg')])->assertSessionHasErrors('category');
+        // kategori baru langsung dibuat saat unggah foto
+        $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Prewedding', 'image' => UploadedFile::fake()->image('a.jpg')])->assertRedirect('/admin/galeri');
+        $this->assertContains('Prewedding', Setting::list('gallery_categories'));
+        $this->post('/admin/galeri', ['title' => 'x', 'category' => str_repeat('k', 31), 'image' => UploadedFile::fake()->image('a.jpg')])->assertSessionHasErrors('category');
+        $this->get('/admin/galeri/buat')->assertOk()->assertSee('Prewedding')->assertSee('Event');
 
-        // kategori lama yang sudah dihapus dari daftar tetap bisa disimpan untuk foto yang memakainya
-        $item = GalleryItem::create(['title' => 'Lama', 'category' => 'Wisuda', 'image_path' => 'https://example.com/a.jpg']);
-        $this->put("/admin/galeri/{$item->id}", ['title' => 'Lama 2', 'category' => 'Wisuda', 'is_active' => 1])->assertRedirect('/admin/galeri');
+        // tidak ada duplikat walau beda huruf besar/kecil
+        $this->post('/admin/galeri', ['title' => 'y', 'category' => 'prewedding', 'image' => UploadedFile::fake()->image('a.jpg')])->assertRedirect('/admin/galeri');
+        $this->assertSame(1, count(array_filter(Setting::list('gallery_categories'), fn ($c) => strtolower($c) === 'prewedding')));
 
-        $this->get('/')->assertSee('data-cat="Prewed"', false)->assertSee('data-cat="Wisuda"', false);
+        // hapus kategori dari daftar; foto yang memakainya tetap tampil & bisa diedit
+        $this->deleteJson('/admin/pilihan/gallery_category', ['value' => 'Event'])->assertNoContent();
+        $this->assertNotContains('Event', Setting::list('gallery_categories'));
+
+        $item = GalleryItem::create(['title' => 'Lama', 'category' => 'Event', 'image_path' => 'https://example.com/a.jpg']);
+        $this->get("/admin/galeri/{$item->id}/ubah")->assertOk()->assertSee('value="Event"', false);
+        $this->get('/')->assertSee('data-cat="Event"', false)->assertSee('data-cat="Prewedding"', false);
     }
 
     public function test_account_update_requires_current_password(): void

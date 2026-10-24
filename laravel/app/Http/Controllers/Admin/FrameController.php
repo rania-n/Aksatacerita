@@ -5,14 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Frame;
 use App\Models\Media;
+use App\Models\Setting;
 use App\Support\ImageUploader;
 use App\Support\Palette;
 use Illuminate\Http\Request;
 
 class FrameController extends Controller
 {
-    public const LABEL_SUGGESTIONS = ['NEW DROP', 'SIGNATURE', 'LIMITED', 'FAVORITE', 'BEST SELLER'];
-
     public function index()
     {
         return view('admin.frames.index', ['items' => Frame::orderBy('sort_order')->orderBy('id')->get()]);
@@ -32,7 +31,7 @@ class FrameController extends Controller
     {
         $data = $this->data($request);
         $data['sort_order'] = (Frame::max('sort_order') ?? -1) + 1;
-        Frame::create($data);
+        Frame::create($data + ['color' => Palette::DEFAULT]);
 
         return redirect()->route('admin.frames.index')->with('ok', 'Frame ditambahkan.');
     }
@@ -58,13 +57,10 @@ class FrameController extends Controller
 
     private function form(?Frame $frame)
     {
-        $labels = Frame::whereNotNull('label')->where('label', '!=', '')->pluck('label')->all();
-
         return view('admin.frames.form', [
             'editing' => $frame,
             'frame' => $frame ?? new Frame(['color' => Palette::DEFAULT, 'is_active' => true]),
-            'swatches' => Palette::swatches(),
-            'labelSuggestions' => array_values(array_unique([...self::LABEL_SUGGESTIONS, ...$labels])),
+            'labelOptions' => Setting::list('options_frame_label'),
         ]);
     }
 
@@ -73,14 +69,14 @@ class FrameController extends Controller
         $v = $request->validate([
             'name' => ['required', 'string', 'max:60'],
             'label' => ['nullable', 'string', 'max:20'],
-            'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-        ], ['color.regex' => 'Pilih warna frame.']);
+            'image' => [$request->route('frame') ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+        ]);
+
+        Setting::addToList('options_frame_label', isset($v['label']) ? strtoupper($v['label']) : null);
 
         $data = [
             'name' => trim($v['name']),
             'label' => isset($v['label']) ? strtoupper($v['label']) : null,
-            'color' => strtolower($v['color']),
             'is_active' => $request->boolean('is_active'),
         ];
         if ($request->hasFile('image')) {

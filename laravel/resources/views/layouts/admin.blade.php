@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') — Admin Aksata Cerita</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="stylesheet" href="{{ asset('css/reset.css') }}">
@@ -13,25 +14,26 @@
 <body>
 @php
     $nav = [
-        ['admin.dashboard', 'Overview', 'grid', 'admin.dashboard'],
-        ['admin.packages.index', 'Paket & Harga', 'camera', 'admin.packages.*'],
-        ['admin.frames.index', 'Katalog Frame', 'sparkle', 'admin.frames.*'],
-        ['admin.gallery.index', 'Galeri Momen', 'grid', 'admin.gallery.*'],
-        ['admin.instagram.index', 'Instagram', 'camera', 'admin.instagram.*'],
-        ['admin.settings.edit', 'Info Studio', 'map', 'admin.settings.*'],
-        ['admin.account.edit', 'Akun', 'user', 'admin.account.*'],
+        ['admin.dashboard', 'Overview', 'Beranda', 'grid', 'admin.dashboard'],
+        ['admin.packages.index', 'Paket & Harga', 'Paket', 'camera', 'admin.packages.*'],
+        ['admin.frames.index', 'Katalog Frame', 'Frame', 'sparkle', 'admin.frames.*'],
+        ['admin.gallery.index', 'Galeri Momen', 'Galeri', 'grid', 'admin.gallery.*'],
+        ['admin.instagram.index', 'Instagram', 'IG', 'camera', 'admin.instagram.*'],
+        ['admin.settings.edit', 'Pengaturan', 'Atur', 'sliders', 'admin.settings.*'],
+        ['admin.account.edit', 'Akun', 'Akun', 'user', 'admin.account.*'],
     ];
 @endphp
-<div class="admin">
+<div class="admin" id="admin">
     <aside>
         <x-brand :light="true" />
+        <button class="rail-toggle" type="button" aria-label="Tampilkan nama menu" aria-expanded="false"><x-icon name="menu" /></button>
         <div class="admin-studio"><span>A</span><div><b>Aksatacerita</b><small>Studio workspace</small></div></div>
-        <nav>
-            @foreach ($nav as [$route, $label, $icon, $pattern])
-                <a href="{{ route($route) }}" class="{{ request()->routeIs($pattern) ? 'active' : '' }}"><x-icon :name="$icon" />{{ $label }}</a>
+        <nav aria-label="Menu admin">
+            @foreach ($nav as [$route, $label, $short, $icon, $pattern])
+                <a href="{{ route($route) }}" title="{{ $label }}" class="{{ request()->routeIs($pattern) ? 'active' : '' }}" @if (request()->routeIs($pattern)) aria-current="page" @endif><x-icon :name="$icon" /><span class="nav-label">{{ $label }}</span><span class="nav-short">{{ $short }}</span></a>
             @endforeach
         </nav>
-        <a class="back-site" href="{{ route('home') }}" target="_blank">← Lihat website</a>
+        <a class="back-site" href="{{ route('home') }}" target="_blank" title="Lihat website"><x-icon name="arrow" :size="16" /><span class="nav-label">Lihat website</span></a>
         <x-credit variant="admin" />
     </aside>
     <div class="admin-main">
@@ -48,6 +50,7 @@
         <div class="admin-content">
             @hasSection('desc')<p class="page-desc">@yield('desc')</p>@endif
             @yield('content')
+            <x-credit variant="admin-foot" />
         </div>
     </div>
 </div>

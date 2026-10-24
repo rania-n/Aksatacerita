@@ -49,7 +49,6 @@ class SettingController extends Controller
             'hero_text' => ['required', 'string', 'max:300'],
             'proof_rating' => ['nullable', 'string', 'max:20'],
             'proof_text' => ['nullable', 'string', 'max:80'],
-            'gallery_categories' => ['required', 'string', 'max:200'],
             'meta_title' => ['required', 'string', 'max:70'],
             'meta_description' => ['required', 'string', 'max:200'],
         ], [
@@ -61,7 +60,6 @@ class SettingController extends Controller
         foreach (self::TOGGLES as $toggle) {
             $v[$toggle] = $request->boolean($toggle) ? '1' : '0';
         }
-        $v['gallery_categories'] = implode(', ', array_slice(Setting::parseList($v['gallery_categories']), 0, 8));
 
         Setting::put(array_map(fn ($value) => is_string($value) ? trim($value) : $value, $v));
 

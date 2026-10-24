@@ -33,6 +33,13 @@ Atau pakai tinker:
 - Hanya user dengan `is_admin = true` yang bisa login; tamu yang membuka `/admin` mendapat 404.
 - Tambah admin: `php artisan tinker --execute="App\Models\User::create(['name'=>'Nama','email'=>'a@b.com','password'=>'...','is_admin'=>true])"`
 
+## Ganti / lupa password lewat email
+Admin klik "Lupa password?" di halaman login, atau tombol "Kirim link ke email saya" di menu Akun.
+Link dikirim ke email admin dan berlaku 60 menit.
+- Lokal: `MAIL_MAILER=log` (bawaan). Link bisa disalin dari `storage/logs/laravel.log`.
+- Online: isi `MAIL_*` di `.env` dengan SMTP (lihat contoh di `.env.example`). Hosting gratis biasanya memblokir pengiriman email
+  langsung, jadi pakai layanan SMTP seperti Brevo atau Gmail. Tanpa SMTP, admin masih bisa ganti password manual di menu Akun.
+
 ## Fitur admin
 (Foto unggahan disimpan di `public/uploads/`, jadi tidak perlu `storage:link`.)
 

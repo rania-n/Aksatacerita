@@ -16,10 +16,19 @@
 
         <label>Judul <i class="req">*</i><input name="title" value="{{ old('title', $e->title ?? '') }}" required maxlength="80" placeholder="Contoh: Sunday with besties">@error('title')<span class="error">{{ $message }}</span>@enderror</label>
 
+        @php $selectedCategory = old('category', $e->category ?? $categories[0] ?? ''); @endphp
         <div class="field">
             <span class="lbl">Kategori <i class="req">*</i></span>
-            <x-seg name="category" :options="array_combine($categories, $categories)" :value="$e->category ?? $categories[0] ?? ''" />
-            <span class="hint">Daftar kategori bisa diubah di menu Info Studio.</span>
+            <div class="seg cat-seg" data-cats data-list="gallery_category">
+                @foreach ($categories as $c)
+                    <span class="chip-opt" data-value="{{ $c }}"><label class="seg-opt"><input type="radio" name="category" value="{{ $c }}" @checked($selectedCategory === $c)><span>{{ $c }}</span></label><button type="button" class="chip-x" aria-label="Hapus kategori {{ $c }}" title="Hapus kategori">×</button></span>
+                @endforeach
+            </div>
+            <div class="add-row">
+                <input type="text" id="new-cat" maxlength="30" placeholder="Kategori baru, contoh: Prewedding" aria-label="Nama kategori baru">
+                <button type="button" class="act" id="add-cat"><x-icon name="plus" :size="14" /> Tambah</button>
+            </div>
+            <span class="hint">Klik untuk memilih kategori. Ketik nama lalu "Tambah" untuk membuat kategori baru. Tekan × untuk menghapus kategori dari daftar (foto yang sudah ada tidak hilang).</span>
             @error('category')<span class="error">{{ $message }}</span>@enderror
         </div>
 

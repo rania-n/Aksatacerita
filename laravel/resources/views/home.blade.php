@@ -114,15 +114,18 @@
                 @foreach ($frames as $i => $frame)
                     @php $code = str_pad($i + 1, 2, '0', STR_PAD_LEFT); @endphp
                     <article class="frame-wrap">
+                        @if ($frame->image_url)
+                            <div class="frame-photo">
+                                <img src="{{ $frame->image_url }}" alt="Frame {{ $frame->name }}" loading="lazy">
+                                @if ($frame->label)<span class="frame-tag">{{ $frame->label }}</span>@endif
+                            </div>
+                        @else
                         <div class="frame-strip" style="background:{{ $frame->color_hex }};color:{{ $frame->text_color }}">
                             <div class="frame-head"><b>AKSATA<br>CERITA</b><span>{{ $frame->label }}</span></div>
-                            @if ($frame->image_url)
-                                <img src="{{ $frame->image_url }}" alt="Frame {{ $frame->name }}" style="height:340px">
-                            @elseif ($photos->isNotEmpty())
-                                <img src="{{ $p($i + 1) }}" alt=""><img src="{{ $p($i + 2) }}" alt="">
-                            @endif
+                            @if ($photos->isNotEmpty())<img src="{{ $p($i + 1) }}" alt=""><img src="{{ $p($i + 2) }}" alt="">@endif
                             <div class="frame-bottom"><span>{{ $frame->name }}</span><b>{{ $code }} / {{ str_pad($frames->count(), 2, '0', STR_PAD_LEFT) }}</b></div>
                         </div>
+                        @endif
                         <div class="frame-meta"><span>{{ $code }}</span><h3>{{ $frame->name }}</h3><a href="{{ $wa }}?text={{ rawurlencode('Halo Aksatacerita! Aku tertarik dengan frame '.$frame->name) }}" target="_blank" rel="noreferrer" aria-label="Tanya frame {{ $frame->name }}" style="width:34px;height:34px;border:1px solid;display:grid;place-items:center"><x-icon name="arrow" /></a></div>
                     </article>
                 @endforeach

@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GalleryItem;
 use App\Models\Media;
+use App\Models\Setting;
 use App\Support\ImageUploader;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class GalleryController extends Controller
 {
@@ -71,10 +71,16 @@ class GalleryController extends Controller
 
     private function validated(Request $request, bool $imageRequired, ?string $current = null): array
     {
-        return $request->validate([
+        $request->merge(['category' => trim((string) $request->input('category'))]);
+
+        $v = $request->validate([
             'title' => ['required', 'string', 'max:80'],
-            'category' => ['required', Rule::in(array_filter([...GalleryItem::categories(), $current]))],
+            'category' => ['required', 'string', 'max:30'],
             'image' => [$imageRequired ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
         ]);
+
+        Setting::addToList('gallery_categories', $v['category']);
+
+        return $v;
     }
 }

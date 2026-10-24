@@ -1,8 +1,10 @@
 @extends('layouts.admin')
-@section('title', 'Info Studio')
+@section('title', 'Pengaturan Website')
+@section('desc', 'Info studio, lokasi, kontak, dan teks halaman depan. Kartu pratinjau menunjukkan tampilannya di website dan berubah saat Anda mengetik.')
 @section('content')
-<form class="settings-form" method="post" action="{{ route('admin.settings.update') }}">
+<form class="form-page" method="post" action="{{ route('admin.settings.update') }}">
     @csrf @method('PUT')
+<div class="settings-form">
     <p class="req-note"><i class="req">*</i> wajib diisi</p>
 
     <section class="panel admin-form">
@@ -67,7 +69,6 @@
         </div>
         <label class="check"><input type="checkbox" name="show_frames" value="1" @checked(old('show_frames', $s['show_frames'] === '1'))> Tampilkan bagian Katalog Frame</label>
         <label class="check"><input type="checkbox" name="show_booth" value="1" @checked(old('show_booth', $s['show_booth'] === '1'))> Tampilkan bagian "Try the booth" (simulasi photobooth)</label>
-        <label>Kategori galeri <i class="req">*</i><input name="gallery_categories" value="{{ old('gallery_categories', $s['gallery_categories']) }}" required maxlength="200"><span class="hint">Pisahkan dengan koma, maksimal 8. Contoh: Event, Wisuda, Couple, Bestie</span>@error('gallery_categories')<span class="error">{{ $message }}</span>@enderror</label>
     </section>
 
     <section class="panel admin-form">
@@ -77,6 +78,34 @@
     </section>
 
     <div class="sticky-save"><button class="btn btn-primary" type="submit">Simpan semua <x-icon name="arrow" /></button></div>
+</div>
+
+<div class="form-preview">
+    <span class="preview-label">PRATINJAU DI WEBSITE</span>
+    <div class="preview-box settings-preview" data-preview="settings">
+        <div class="pv-ticker" data-s-nonempty="ticker"><span data-s="ticker"></span></div>
+        <div class="pv pv-hero">
+            <small>PHOTOBOOTH STUDIO · <span data-s="city"></span></small>
+            <h4><span data-s="hero_line1"></span><br><span data-s="hero_line2"></span> <em data-s="hero_highlight"></em></h4>
+            <p data-s="hero_text"></p>
+            <div class="pv-proof" data-s-if="proof_show"><b data-s="proof_rating"></b><span data-s="proof_text"></span></div>
+        </div>
+        <div class="pv pv-info">
+            <small>COME SAY HI</small>
+            <b data-s="studio_name"></b>
+            <p class="pre" data-s="address"></p>
+            <p><b data-s="open_days"></b> · <span data-s="open_hours"></span></p>
+            <p data-s-nonempty="last_session"><span data-s="last_session"></span></p>
+            <p class="pv-links">WhatsApp <b data-s="whatsapp" data-s-fmt="wa"></b> · Instagram <b data-s="instagram" data-s-fmt="ig"></b></p>
+        </div>
+        <div class="pv pv-google">
+            <small>HASIL PENCARIAN GOOGLE</small>
+            <div class="g-title" data-s="meta_title"></div>
+            <div class="g-url">{{ preg_replace('~^https?://~', '', url('/')) }}</div>
+            <div class="g-desc" data-s="meta_description"></div>
+        </div>
+    </div>
+</div>
 </form>
 
 <link rel="stylesheet" href="{{ asset('vendor/leaflet/leaflet.css') }}">

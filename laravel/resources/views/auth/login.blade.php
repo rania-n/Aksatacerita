@@ -16,9 +16,11 @@
         @csrf
         <x-brand />
         <div><small>ADMIN AREA</small><h1>Masuk.</h1></div>
-        <label>Email<input type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"></label>
-        <label>Password<input type="password" name="password" required autocomplete="current-password"></label>
+        @if (session('status'))<div class="login-status">{{ session('status') }}</div>@endif
+        <label>Email <i class="req">*</i><input type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"></label>
+        <label>Password <i class="req">*</i><input type="password" name="password" required autocomplete="current-password"></label>
         @error('email')<div class="error">{{ $message }}</div>@enderror
+        <a class="forgot" href="{{ route('password.request') }}">Lupa password?</a>
         <label class="remember"><input type="checkbox" name="remember" value="1"> Ingat saya</label>
         <button class="btn btn-primary" type="submit">Masuk <x-icon name="arrow" /></button>
         <a class="back" href="{{ route('home') }}">← Kembali ke website</a>

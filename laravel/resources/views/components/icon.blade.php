@@ -15,6 +15,7 @@ $paths = [
     'up' => '<path d="M6 15l6-6 6 6" />',
     'down' => '<path d="M6 9l6 6 6-6" />',
     'user' => '<circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" />',
+    'sliders' => '<path d="M4 7h10M18 7h2M4 17h2M10 17h10" /><circle cx="16" cy="7" r="2" /><circle cx="8" cy="17" r="2" />',
     'x' => '<path d="M6 6l12 12M18 6L6 18" />',
 ];
 @endphp
