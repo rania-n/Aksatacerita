@@ -12,6 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+        $middleware->appendToGroup('web', \App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias(['admin' => \App\Http\Middleware\EnsureAdmin::class]);
         // Tamu yang membuka /admin* mendapat 404 (bukan redirect ke login); login hanya lewat /login.
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('admin', 'admin/*') ? abort(404) : route('login'));

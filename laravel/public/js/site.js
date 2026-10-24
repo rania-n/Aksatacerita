@@ -38,6 +38,14 @@
     backdrop.classList.toggle('show', open);
     drawer.setAttribute('aria-hidden', String(!open));
   };
+  let session = '';
+  let when = 'hari ini';
+  const dateInput = $('.booking-date');
+  const chips = $$('.date-chips button');
+  const updateLink = () => {
+    const text = submit.dataset.message + session + (when ? ' untuk ' + when : '');
+    submit.href = submit.dataset.wa + '?text=' + encodeURIComponent(text);
+  };
   const selectSession = (name) => {
     let found = false;
     options.forEach((o) => {
@@ -46,7 +54,7 @@
       o.classList.toggle('active', on);
       $('i', o).textContent = on ? '✓' : '○';
     });
-    if (found) submit.href = submit.dataset.base + encodeURIComponent(name);
+    if (found) { session = name; updateLink(); }
   };
   $$('[data-open-booking]').forEach((b) => b.addEventListener('click', () => {
     if (b.dataset.session) selectSession(b.dataset.session);
@@ -57,9 +65,30 @@
   options.forEach((o) => o.addEventListener('click', () => selectSession(o.dataset.name)));
   if (options[0]) selectSession(options[0].dataset.name);
 
-  // Date chips
-  const chips = $$('.date-chips button');
-  chips.forEach((c) => c.addEventListener('click', () => chips.forEach((x) => x.classList.toggle('active', x === c))));
+  // Waktu datang (ikut masuk ke pesan WhatsApp)
+  const pad = (n) => String(n).padStart(2, '0');
+  const today = new Date();
+  dateInput.min = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+  const pickDate = () => {
+    if (!dateInput.value) { when = ''; return updateLink(); }
+    const [y, m, d] = dateInput.value.split('-').map(Number);
+    when = new Date(y, m - 1, d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+    updateLink();
+  };
+  chips.forEach((c) => c.addEventListener('click', () => {
+    chips.forEach((x) => x.classList.toggle('active', x === c));
+    if (c.dataset.when === 'date') {
+      dateInput.hidden = false;
+      pickDate();
+      if (dateInput.showPicker) { try { dateInput.showPicker(); } catch (e) { /* abaikan */ } }
+    } else {
+      dateInput.hidden = true;
+      when = c.dataset.when;
+      updateLink();
+    }
+  }));
+  dateInput.addEventListener('change', pickDate);
+  updateLink();
 
   // Gallery filter
   const filters = $$('.filters button');

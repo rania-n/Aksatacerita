@@ -34,7 +34,7 @@ class GalleryController extends Controller
 
     public function update(Request $request, GalleryItem $item)
     {
-        $v = $this->validated($request, imageRequired: false);
+        $v = $this->validated($request, imageRequired: false, current: $item->category);
         $data = ['title' => trim($v['title']), 'category' => $v['category'], 'is_active' => $request->boolean('is_active')];
         if ($request->hasFile('image')) {
             Media::delete($item->image_path);
@@ -53,11 +53,11 @@ class GalleryController extends Controller
         return redirect()->route('admin.gallery.index')->with('ok', 'Foto dihapus.');
     }
 
-    private function validated(Request $request, bool $imageRequired): array
+    private function validated(Request $request, bool $imageRequired, ?string $current = null): array
     {
         return $request->validate([
             'title' => ['required', 'string', 'max:80'],
-            'category' => ['required', Rule::in(GalleryItem::CATEGORIES)],
+            'category' => ['required', Rule::in(array_filter([...GalleryItem::categories(), $current]))],
             'image' => [$imageRequired ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
         ]);
     }

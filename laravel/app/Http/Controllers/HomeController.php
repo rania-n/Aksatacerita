@@ -18,6 +18,7 @@ class HomeController extends Controller
             'gallery' => GalleryItem::active()->get(),
             'instagram' => InstagramPost::active()->get(),
             's' => Setting::allValues(),
+            'categories' => Setting::list('gallery_categories'),
         ]);
     }
 }

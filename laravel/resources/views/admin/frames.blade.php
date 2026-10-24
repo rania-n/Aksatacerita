@@ -12,8 +12,9 @@
                     <div><b>{{ $item->name }}{{ $item->is_active ? '' : ' (disembunyikan)' }}</b><small>{{ $item->label }} · {{ \App\Models\Frame::COLORS[$item->color] ?? $item->color }}</small></div>
                     <span></span>
                     <div class="row-actions">
+                        <x-reorder type="frame" :item="$item" :first="$loop->first" :last="$loop->last" />
                         <a href="{{ route('admin.frames.index', $item) }}" aria-label="Ubah {{ $item->name }}"><x-icon name="edit" :size="17" /></a>
-                        <form method="post" action="{{ route('admin.frames.destroy', $item) }}" onsubmit="return confirm('Hapus frame {{ e($item->name) }}?')">@csrf @method('DELETE')<button aria-label="Hapus {{ $item->name }}"><x-icon name="trash" :size="17" /></button></form>
+                        <form method="post" action="{{ route('admin.frames.destroy', $item) }}" onsubmit="return confirm({{ Illuminate\Support\Js::from('Hapus frame '.$item->name.'?') }})">@csrf @method('DELETE')<button aria-label="Hapus {{ $item->name }}"><x-icon name="trash" :size="17" /></button></form>
                     </div>
                 </div>
             @empty

@@ -37,6 +37,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/instagram/{post}', [Admin\InstagramController::class, 'update'])->name('instagram.update');
     Route::delete('/instagram/{post}', [Admin\InstagramController::class, 'destroy'])->name('instagram.destroy');
 
+    Route::post('/urutan/{type}/{id}/{direction}', Admin\ReorderController::class)->whereNumber('id')->name('reorder');
+
+    Route::get('/akun', [Admin\AccountController::class, 'edit'])->name('account.edit');
+    Route::put('/akun', [Admin\AccountController::class, 'update'])->name('account.update');
+
     Route::get('/info', [Admin\SettingController::class, 'edit'])->name('settings.edit');
     Route::put('/info', [Admin\SettingController::class, 'update'])->name('settings.update');
 });

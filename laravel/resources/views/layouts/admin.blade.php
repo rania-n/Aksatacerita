@@ -19,6 +19,7 @@
         ['admin.gallery.index', 'Galeri Momen', 'grid', 'admin.gallery.*'],
         ['admin.instagram.index', 'Instagram', 'camera', 'admin.instagram.*'],
         ['admin.settings.edit', 'Info Studio', 'map', 'admin.settings.*'],
+        ['admin.account.edit', 'Akun', 'user', 'admin.account.*'],
     ];
 @endphp
 <div class="admin">

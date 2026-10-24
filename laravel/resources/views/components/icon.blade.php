@@ -12,6 +12,9 @@ $paths = [
     'trash' => '<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13" />',
     'edit' => '<path d="M4 20h4L19 9l-4-4L4 16z" /><path d="M13 7l4 4" />',
     'whatsapp' => '<path d="M20 11.5A8.5 8.5 0 0 1 7.4 19l-4.4 1 1.1-4.2A8.5 8.5 0 1 1 20 11.5z" /><path d="M8 8c.5 3 2 4.5 5 5" />',
+    'up' => '<path d="M6 15l6-6 6 6" />',
+    'down' => '<path d="M6 9l6 6 6-6" />',
+    'user' => '<circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" />',
     'x' => '<path d="M6 6l12 12M18 6L6 18" />',
 ];
 @endphp

@@ -8,7 +8,6 @@ cd laravel
 composer install            # hanya jika vendor/ belum ada
 cp .env.example .env && php artisan key:generate   # hanya jika .env belum ada
 php artisan migrate --seed
-php artisan storage:link    # sekali saja, supaya foto unggahan tampil
 php artisan serve
 ```
 - Website: http://127.0.0.1:8000
@@ -28,8 +27,10 @@ Atau pakai tinker:
 - Tambah admin: `php artisan tinker --execute="App\Models\User::create(['name'=>'Nama','email'=>'a@b.com','password'=>'...','is_admin'=>true])"`
 
 ## Fitur admin
-Paket & Harga (tambah, ubah, hapus, sembunyikan), Katalog Frame (dengan gambar), Galeri Momen (unggah foto),
-Info Studio (alamat, jam buka, WhatsApp, Instagram, Google Maps).
+(Foto unggahan disimpan di `public/uploads/`, jadi tidak perlu `storage:link`.)
+
+Paket & Harga (durasi, harga coret, satuan, paket unggulan, urutan), Katalog Frame, Galeri Momen (kategori bisa diatur),
+Instagram (tempel link postingan), Info Studio (lokasi dengan pin peta, jam buka, kontak & sosial media, teks halaman depan, tampilan Google), Akun (ganti email/password).
 
 ## Tes
 `php artisan test`

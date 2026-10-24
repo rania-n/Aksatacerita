@@ -19,11 +19,11 @@ class DatabaseSeeder extends Seeder
 
         if (Package::count() === 0) {
             foreach ([
-                ['Regular Photobox', '35K', 'Most Picked', 'blue', ['15 menit sesi', '2 strip cetak', 'All soft files']],
-                ['Self Photo Studio', '75K', 'Slow & Sweet', 'orange', ['30 menit sesi', '2 foto cetak 4R', 'All soft files']],
-                ['Passport Booth', '25K', 'Ready in 10 min', 'pink', ['6 pas foto', 'Background pilihan', 'File high-res']],
-            ] as $i => [$name, $price, $tag, $color, $features]) {
-                Package::create(compact('name', 'price', 'tag', 'color', 'features') + ['sort_order' => $i]);
+                ['Regular Photobox', '35K', 'Most Picked', 'blue', ['2 strip cetak', 'All soft files'], '15 menit', true],
+                ['Self Photo Studio', '75K', 'Slow & Sweet', 'orange', ['2 foto cetak 4R', 'All soft files'], '30 menit', false],
+                ['Passport Booth', '25K', 'Ready in 10 min', 'pink', ['6 pas foto', 'Background pilihan', 'File high-res'], '10 menit', false],
+            ] as $i => [$name, $price, $tag, $color, $features, $duration, $is_featured]) {
+                Package::create(compact('name', 'price', 'tag', 'color', 'features', 'duration', 'is_featured') + ['price_note' => 'Mulai dari', 'sort_order' => $i]);
             }
         }
 

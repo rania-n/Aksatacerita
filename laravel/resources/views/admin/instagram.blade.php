@@ -11,6 +11,7 @@
                 <div><b>{{ str_replace(['https://www.instagram.com/', '/'], ['', ' / '], rtrim($item->url, '/')) }}</b><small><a href="{{ $item->url }}" target="_blank" rel="noreferrer">{{ $item->url }}</a>{{ $item->is_active ? '' : ' · disembunyikan' }}</small></div>
                 <span></span>
                 <div class="row-actions">
+                    <x-reorder type="instagram" :item="$item" :first="$loop->first" :last="$loop->last" />
                     <a href="{{ route('admin.instagram.index', $item) }}" aria-label="Ubah"><x-icon name="edit" :size="16" /></a>
                     <form method="post" action="{{ route('admin.instagram.destroy', $item) }}" onsubmit="return confirm('Hapus postingan ini?')">@csrf @method('DELETE')<button aria-label="Hapus"><x-icon name="trash" :size="16" /></button></form>
                 </div>

@@ -8,7 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable(['title', 'category', 'image_path', 'sort_order', 'is_active'])]
 class GalleryItem extends Model
 {
-    public const CATEGORIES = ['Event', 'Wisuda', 'Couple', 'Bestie'];
+    /**
+     * Daftar kategori galeri (diatur admin di Info Studio).
+     *
+     * @return list<string>
+     */
+    public static function categories(): array
+    {
+        return Setting::list('gallery_categories');
+    }
 
     protected function casts(): array
     {
