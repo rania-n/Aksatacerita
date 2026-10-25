@@ -105,6 +105,28 @@
   filters.forEach((f) => f.addEventListener('click', () => applyFilter(f.dataset.cat)));
   if (filters.length) applyFilter('Semua');
 
+  // Katalog frame: saring per jenis, tampilkan sebagian dulu
+  const frameCards = $$('.frame-wrap');
+  const frameFilters = $$('.frame-filters button');
+  const moreBox = $('.frames-more');
+  const FIRST = 8;
+  let frameType = 'Semua';
+  let expanded = false;
+  const renderFrames = () => {
+    const matching = frameCards.filter((c) => frameType === 'Semua' || c.dataset.type === frameType);
+    frameCards.forEach((c) => { c.hidden = true; });
+    matching.forEach((c, i) => { c.hidden = !(expanded || i < FIRST); });
+    if (moreBox) moreBox.hidden = expanded || matching.length <= FIRST;
+  };
+  frameFilters.forEach((b) => b.addEventListener('click', () => {
+    frameType = b.dataset.type;
+    expanded = false;
+    frameFilters.forEach((x) => x.classList.toggle('active', x === b));
+    renderFrames();
+  }));
+  if (moreBox) $('button', moreBox).addEventListener('click', () => { expanded = true; renderFrames(); });
+  if (frameCards.length) renderFrames();
+
   // Photobooth playground
   const machine = $('.booth-machine');
   if (machine) {

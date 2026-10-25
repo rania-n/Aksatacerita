@@ -61,6 +61,8 @@ class FrameController extends Controller
             'editing' => $frame,
             'frame' => $frame ?? new Frame(['color' => Palette::DEFAULT, 'is_active' => true]),
             'labelOptions' => Setting::list('options_frame_label'),
+            'typeOptions' => Setting::list('options_frame_type'),
+            'sizeOptions' => Setting::list('options_frame_size'),
         ]);
     }
 
@@ -69,14 +71,20 @@ class FrameController extends Controller
         $v = $request->validate([
             'name' => ['required', 'string', 'max:60'],
             'label' => ['nullable', 'string', 'max:20'],
-            'image' => [$request->route('frame') ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'type' => ['nullable', 'string', 'max:30'],
+            'size' => ['nullable', 'string', 'max:12'],
+            'image' => [$request->route('frame') ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
         ]);
 
         Setting::addToList('options_frame_label', isset($v['label']) ? strtoupper($v['label']) : null);
+        Setting::addToList('options_frame_type', $v['type'] ?? null);
+        Setting::addToList('options_frame_size', isset($v['size']) ? strtoupper($v['size']) : null);
 
         $data = [
             'name' => trim($v['name']),
             'label' => isset($v['label']) ? strtoupper($v['label']) : null,
+            'type' => $v['type'] ?? null,
+            'size' => isset($v['size']) ? strtoupper($v['size']) : null,
             'is_active' => $request->boolean('is_active'),
         ];
         if ($request->hasFile('image')) {

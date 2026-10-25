@@ -44,6 +44,8 @@ class Setting extends Model
         // Pilihan cepat di form admin (bisa dihapus dan bertambah otomatis)
         'options_package_tag' => 'Most Picked, Best Seller, Promo, Baru, Hemat, Slow & Sweet, Ready in 10 min',
         'options_package_note' => 'Mulai dari, Hanya, Per sesi',
+        'options_frame_type' => 'Frame Biasa, Frame Koran, ID Card',
+        'options_frame_size' => '2R, 4R',
         'options_frame_label' => 'NEW DROP, SIGNATURE, LIMITED, FAVORITE, BEST SELLER',
         // Google
         'meta_title' => 'Aksata Cerita — Photobooth Studio Tulungagung',

@@ -210,3 +210,5 @@
 .pv-google{background:#fafafa;border-bottom:0}
 .g-title{font:400 17px Arial,sans-serif;color:#1a0dab;line-height:1.3}.g-url{font:12px Arial,sans-serif;color:#006621;margin:3px 0}.g-desc{font:13px/1.5 Arial,sans-serif;color:#545454}
 @media (max-width:800px){.admin-user>span{display:none}.admin-main header h1{font-size:23px}}
+.inline.nowrap .grow{flex:1;min-width:0}
+.frame-size{font:700 10px "Space Grotesk";letter-spacing:1px;border:1px solid #888;padding:3px 6px;font-style:normal;color:#555;margin-left:auto}

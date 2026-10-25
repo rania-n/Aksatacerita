@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'description', 'duration_value', 'duration_unit', 'price_note', 'price_amount', 'price_style', 'old_price_amount', 'tag', 'color', 'features', 'is_featured', 'sort_order', 'is_active'])]
+#[Fillable(['name', 'description', 'duration_value', 'duration_unit', 'price_note', 'price_amount', 'price_style', 'old_price_amount', 'addon_price_amount', 'addon_text', 'tag', 'color', 'features', 'is_featured', 'sort_order', 'is_active'])]
 class Package extends Model
 {
     use HasFactory;
@@ -19,7 +19,7 @@ class Package extends Model
 
     protected function casts(): array
     {
-        return ['features' => 'array', 'is_active' => 'boolean', 'is_featured' => 'boolean', 'price_amount' => 'integer', 'old_price_amount' => 'integer', 'duration_value' => 'integer'];
+        return ['features' => 'array', 'is_active' => 'boolean', 'is_featured' => 'boolean', 'price_amount' => 'integer', 'old_price_amount' => 'integer', 'addon_price_amount' => 'integer', 'duration_value' => 'integer'];
     }
 
     public function scopeActive($query)
@@ -35,6 +35,11 @@ class Package extends Model
     public function getOldPriceTextAttribute(): ?string
     {
         return $this->old_price_amount ? Money::format($this->old_price_amount, $this->price_style ?? 'k') : null;
+    }
+
+    public function getAddonPriceTextAttribute(): ?string
+    {
+        return $this->addon_price_amount ? Money::format($this->addon_price_amount, $this->price_style ?? 'k') : null;
     }
 
     public function getDurationTextAttribute(): ?string

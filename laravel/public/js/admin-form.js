@@ -139,6 +139,10 @@
       setText(q('price'), money(price, style));
       setText(q('old'), 'Rp' + money(old, style));
       toggle(q('old'), old > 0);
+      const addon = int(f.addon_price.value);
+      setText(q('addon-price'), 'Rp' + money(addon, style));
+      setText(q('addon-text'), f.addon_text.value.trim());
+      toggle(q('addon'), addon > 0);
       setText(q('duration-text'), dur + ' ' + (f.duration_unit.value || 'menit'));
       toggle(q('duration'), dur > 0);
 
@@ -174,6 +178,9 @@
     let blob = null;
     const update = () => {
       setText(q('name'), f.name.value.trim() || 'Nama frame');
+      const size = f.size.value.trim().toUpperCase();
+      setText(q('size'), size);
+      toggle(q('size'), size !== '');
       const label = f.label.value.trim().toUpperCase();
       setText(q('label'), label);
       toggle(q('label'), label !== '');

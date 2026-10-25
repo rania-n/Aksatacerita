@@ -8,7 +8,7 @@
         @forelse ($items as $item)
             <div class="admin-item {{ $item->is_active ? '' : 'off' }}">
                 <div class="admin-thumb" style="background:{{ $item->color_hex }}22;color:{{ $item->color_hex }}">@if ($item->image_url)<img src="{{ $item->image_url }}" alt="">@else<x-icon name="sparkle" />@endif</div>
-                <div><b>{{ $item->name }}{{ $item->is_active ? '' : ' (disembunyikan)' }}</b><small>{{ $item->label ?: 'Tanpa label' }} · {{ \App\Support\Palette::name($item->color) }}</small></div>
+                <div><b>{{ $item->name }}{{ $item->is_active ? '' : ' (disembunyikan)' }}</b><small>{{ collect([$item->type, $item->size, $item->label])->filter()->implode(' · ') ?: 'Belum ada jenis/ukuran' }}</small></div>
                 <span></span>
                 <x-row-actions type="frame" :item="$item" :first="$loop->first" :last="$loop->last" :edit="route('admin.frames.edit', $item)" :destroy="route('admin.frames.destroy', $item)" :confirm="'Hapus frame '.$item->name.'?'" />
             </div>

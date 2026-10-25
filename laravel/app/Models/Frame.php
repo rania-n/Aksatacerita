@@ -6,7 +6,7 @@ use App\Support\Palette;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['name', 'label', 'color', 'image_path', 'sort_order', 'is_active'])]
+#[Fillable(['name', 'label', 'type', 'size', 'color', 'image_path', 'sort_order', 'is_active'])]
 class Frame extends Model
 {
     protected function casts(): array

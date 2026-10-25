@@ -72,7 +72,7 @@ class PackageController extends Controller
     private function data(Request $request): array
     {
         // "35.000", "Rp 35000" -> 35000
-        foreach (['price', 'old_price'] as $key) {
+        foreach (['price', 'old_price', 'addon_price'] as $key) {
             $request->merge([$key => preg_replace('/\D+/', '', (string) $request->input($key)) ?: null]);
         }
 
@@ -85,6 +85,8 @@ class PackageController extends Controller
             'price' => ['required', 'integer', 'min:0', 'max:100000000'],
             'price_style' => ['required', 'in:k,rp'],
             'old_price' => ['nullable', 'integer', 'gt:price', 'max:100000000'],
+            'addon_price' => ['nullable', 'integer', 'min:1', 'max:100000000'],
+            'addon_text' => ['nullable', 'string', 'max:120'],
             'tag' => ['nullable', 'string', 'max:40'],
             'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'features' => ['nullable', 'string', 'max:1000'],
@@ -105,6 +107,8 @@ class PackageController extends Controller
             'price_amount' => (int) $v['price'],
             'price_style' => $v['price_style'],
             'old_price_amount' => isset($v['old_price']) ? (int) $v['old_price'] : null,
+            'addon_price_amount' => isset($v['addon_price']) ? (int) $v['addon_price'] : null,
+            'addon_text' => $v['addon_text'] ?? null,
             'tag' => $v['tag'] ?? null,
             'color' => strtolower($v['color']),
             'is_featured' => $request->boolean('is_featured'),

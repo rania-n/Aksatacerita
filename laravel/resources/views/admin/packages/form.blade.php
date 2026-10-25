@@ -38,6 +38,16 @@
             <span class="hint">Isi bila sedang diskon, harus lebih besar dari harga. Tampil dicoret di bawah harga.</span>@error('old_price')<span class="error">{{ $message }}</span>@enderror
         </label>
 
+        <div class="field">
+            <span class="lbl">Add On (tambah cetakan)</span>
+            <div class="inline nowrap">
+                <span class="input-group"><b>Rp</b><input type="number" name="addon_price" value="{{ old('addon_price', $p->addon_price_amount) }}" min="1" step="500" inputmode="numeric" placeholder="15000" aria-label="Harga add on"></span>
+                <input type="text" name="addon_text" value="{{ old('addon_text', $p->addon_text) }}" maxlength="120" placeholder="Contoh: 1 cetakan, sama dengan sesi sebelumnya" aria-label="Isi add on" class="grow">
+            </div>
+            <span class="hint">Isi bila pelanggan bisa menambah cetakan. Kosongkan jika tidak ada add on.</span>
+            @error('addon_price')<span class="error">{{ $message }}</span>@enderror @error('addon_text')<span class="error">{{ $message }}</span>@enderror
+        </div>
+
         <label>Teks di atas harga<input name="price_note" id="f-note" value="{{ old('price_note', $p->price_note) }}" maxlength="30" placeholder="Mulai dari"></label>
         <x-chips target="f-note" list="package_note" :items="$noteOptions" />
 

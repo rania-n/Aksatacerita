@@ -11,6 +11,9 @@
     </div>
     @if ($preview || $pkg->duration_text)<div class="package-duration" data-p="duration" {{ $pkg->duration_text ? '' : 'hidden' }}><x-icon name="clock" :size="14" /> <span data-p="duration-text">{{ $pkg->duration_text }}</span></div>@endif
     <ul data-p="features">@foreach ($pkg->features ?? [] as $f)<li><span>✓</span>{{ $f }}</li>@endforeach</ul>
+    @if ($preview || $pkg->addon_price_amount)
+        <div class="package-addon" data-p="addon" {{ $pkg->addon_price_amount ? '' : 'hidden' }}><b>Add On <span data-p="addon-price">Rp{{ $pkg->addon_price_text }}</span></b><span data-p="addon-text">{{ $pkg->addon_text }}</span></div>
+    @endif
     @if ($preview)
         <button type="button" class="package-select" tabindex="-1">Pilih paket <x-icon name="arrow" /></button>
     @else

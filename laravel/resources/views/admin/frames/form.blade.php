@@ -11,12 +11,18 @@
 
         <label>Nama frame <i class="req">*</i><input name="name" value="{{ old('name', $f->name) }}" required maxlength="60" placeholder="Contoh: Retro Blue">@error('name')<span class="error">{{ $message }}</span>@enderror</label>
 
+        <label>Jenis frame<input name="type" id="f-type" value="{{ old('type', $f->type) }}" maxlength="30" placeholder="Contoh: Frame Biasa"><span class="hint">Dipakai untuk menyaring frame di website. Klik pilihan atau ketik jenis baru.</span>@error('type')<span class="error">{{ $message }}</span>@enderror</label>
+        <x-chips target="f-type" list="frame_type" :items="$typeOptions" />
+
+        <label>Ukuran cetak<input name="size" id="f-size" value="{{ old('size', $f->size) }}" maxlength="12" placeholder="Contoh: 4R">@error('size')<span class="error">{{ $message }}</span>@enderror</label>
+        <x-chips target="f-size" list="frame_size" :items="$sizeOptions" />
+
         <label>Label<input name="label" id="f-label" value="{{ old('label', $f->label) }}" maxlength="20" placeholder="Contoh: NEW DROP"><span class="hint">Klik pilihan di bawah atau ketik sendiri. Yang Anda ketik akan tersimpan jadi pilihan baru. Tekan × untuk menghapus pilihan.</span>@error('label')<span class="error">{{ $message }}</span>@enderror</label>
         <x-chips target="f-label" list="frame_label" :items="$labelOptions" />
 
         <label>Foto frame @unless ($e)<i class="req">*</i>@endunless
             <input type="file" name="image" accept="image/png,image/jpeg,image/webp" @required(! $e)>
-            <span class="hint">@if ($e?->image_url)Sudah ada gambar. Pilih file baru hanya bila ingin menggantinya. @endif JPG, PNG, atau WebP, maksimal 4 MB (otomatis dikompres).</span>@error('image')<span class="error">{{ $message }}</span>@enderror
+            <span class="hint">@if ($e?->image_url)Sudah ada gambar. Pilih file baru hanya bila ingin menggantinya. @endif JPG, PNG, atau WebP, maksimal 10 MB (otomatis dikecilkan &amp; dikompres). PNG transparan tetap transparan.</span>@error('image')<span class="error">{{ $message }}</span>@enderror
         </label>
 
         <label class="check"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $f->is_active ?? true))> Tampilkan di website</label>
@@ -33,7 +39,7 @@
                 <div class="frame-ph" data-p="placeholder" {{ $f->image_url ? 'hidden' : '' }}>Pilih foto frame untuk melihat pratinjau</div>
                 <span class="frame-tag" data-p="label" {{ $f->label ? '' : 'hidden' }}>{{ $f->label }}</span>
             </div>
-            <div class="frame-meta"><span>01</span><h3 data-p="name">{{ $f->name ?: 'Nama frame' }}</h3></div>
+            <div class="frame-meta"><span>01</span><h3 data-p="name">{{ $f->name ?: 'Nama frame' }}</h3><em class="frame-size" data-p="size" {{ $f->size ? '' : 'hidden' }}>{{ $f->size }}</em></div>
         </div>
     </div>
 </form>

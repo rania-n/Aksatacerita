@@ -13,6 +13,8 @@ class OptionController extends Controller
         'package_tag' => 'options_package_tag',
         'package_note' => 'options_package_note',
         'frame_label' => 'options_frame_label',
+        'frame_type' => 'options_frame_type',
+        'frame_size' => 'options_frame_size',
         'gallery_category' => 'gallery_categories',
     ];
 

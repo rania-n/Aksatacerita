@@ -74,9 +74,50 @@ class ImageUploader
     private static function open(UploadedFile $file): ?GdImage
     {
         $data = @file_get_contents($file->getRealPath());
-        $image = $data === false ? false : @imagecreatefromstring($data);
+        if ($data === false || ! self::ensureMemoryFor($data)) {
+            return null;
+        }
+        $image = @imagecreatefromstring($data);
 
         return $image ?: null;
+    }
+
+    /** Gambar besar (mis. PNG 3750x5625) butuh ratusan MB saat didekode; naikkan batas bila boleh, kalau tidak lewati kompresi. */
+    private static function ensureMemoryFor(string $data): bool
+    {
+        $size = @getimagesizefromstring($data);
+        if (! $size) {
+            return false;
+        }
+
+        $needed = (int) ($size[0] * $size[1] * 4 * 2.5) + 32 * 1024 * 1024;
+        $limit = self::bytes((string) ini_get('memory_limit'));
+        if ($limit === -1) {
+            return true;
+        }
+        if ($limit - memory_get_usage() >= $needed) {
+            return true;
+        }
+
+        $target = memory_get_usage() + $needed;
+
+        return $target <= 1024 * 1024 * 1024 && @ini_set('memory_limit', (string) $target) !== false;
+    }
+
+    private static function bytes(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '-1') {
+            return -1;
+        }
+        $number = (int) $value;
+
+        return match (strtolower(substr($value, -1))) {
+            'g' => $number * 1024 ** 3,
+            'm' => $number * 1024 ** 2,
+            'k' => $number * 1024,
+            default => $number,
+        };
     }
 
     /** Foto dari HP sering tersimpan "miring" lewat tanda EXIF; putar sesuai aslinya. */

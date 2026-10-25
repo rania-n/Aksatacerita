@@ -110,10 +110,14 @@
     <section class="frames-section" id="frame">
         <div class="shell">
             <div class="section-heading compact"><div><span class="kicker">02 — FRAME OF THE MONTH</span><h2>Pilih mood.<br><i>Cetak ceritamu.</i></h2></div><div class="limited-pill"><span>●</span> Updated monthly</div></div>
+            @php $frameTypes = $frames->pluck('type')->filter()->unique()->values(); @endphp
+            @if ($frameTypes->count() > 1)
+            <div class="filters frame-filters">@foreach ($frameTypes->prepend('Semua') as $type)<button type="button" data-type="{{ $type }}" class="{{ $loop->first ? 'active' : '' }}">{{ $type }}</button>@endforeach</div>
+            @endif
             <div class="frames-scroll">
                 @foreach ($frames as $i => $frame)
                     @php $code = str_pad($i + 1, 2, '0', STR_PAD_LEFT); @endphp
-                    <article class="frame-wrap">
+                    <article class="frame-wrap" data-type="{{ $frame->type }}">
                         @if ($frame->image_url)
                             <div class="frame-photo">
                                 <img src="{{ $frame->image_url }}" alt="Frame {{ $frame->name }}" loading="lazy">
@@ -126,10 +130,11 @@
                             <div class="frame-bottom"><span>{{ $frame->name }}</span><b>{{ $code }} / {{ str_pad($frames->count(), 2, '0', STR_PAD_LEFT) }}</b></div>
                         </div>
                         @endif
-                        <div class="frame-meta"><span>{{ $code }}</span><h3>{{ $frame->name }}</h3><a href="{{ $wa }}?text={{ rawurlencode('Halo Aksatacerita! Aku tertarik dengan frame '.$frame->name) }}" target="_blank" rel="noreferrer" aria-label="Tanya frame {{ $frame->name }}" style="width:34px;height:34px;border:1px solid;display:grid;place-items:center"><x-icon name="arrow" /></a></div>
+                        <div class="frame-meta"><span>{{ $code }}</span><h3>{{ $frame->name }}</h3>@if ($frame->size)<em class="frame-size">{{ $frame->size }}</em>@endif<a href="{{ $wa }}?text={{ rawurlencode('Halo Aksatacerita! Aku tertarik dengan frame '.$frame->name) }}" target="_blank" rel="noreferrer" aria-label="Tanya frame {{ $frame->name }}" style="width:34px;height:34px;border:1px solid;display:grid;place-items:center"><x-icon name="arrow" /></a></div>
                     </article>
                 @endforeach
             </div>
+            <div class="frames-more" hidden><button type="button" class="btn btn-dark">Lihat semua frame <x-icon name="arrow" /></button></div>
         </div>
     </section>
     @endif
@@ -198,7 +203,7 @@
     <aside class="booking-drawer" aria-hidden="true">
         <div class="booking-head"><div><span>RESERVE YOUR MOMENT</span><h2>Pesan sesi.</h2></div><button data-close-booking aria-label="Tutup"><x-icon name="x" /></button></div>
         <div class="booking-step"><span>01</span><div><b>Pilih sesi favoritmu</b><p>Kamu bisa konfirmasi ulang lewat WhatsApp.</p></div></div>
-        <div class="session-options">@foreach ($packages as $pkg)<button data-name="{{ $pkg->name }}"><span><x-icon name="camera" /></span><div><b>{{ $pkg->name }}</b><small>Mulai Rp{{ $pkg->price }}</small></div><i>○</i></button>@endforeach</div>
+        <div class="session-options">@foreach ($packages as $pkg)<button data-name="{{ $pkg->name }}"><span><x-icon name="camera" /></span><div><b>{{ $pkg->name }}</b><small>{{ $pkg->price_note ?: 'Harga' }} Rp{{ $pkg->price_text }}</small></div><i>○</i></button>@endforeach</div>
         <div class="booking-step"><span>02</span><div><b>Pilih waktu datang</b><p>{{ $s['open_days'] }}, {{ $s['open_hours'] }}</p></div></div>
         <div class="date-chips"><button type="button" data-when="hari ini" class="active">Hari ini<small>Walk in</small></button><button type="button" data-when="besok">Besok<small>Datang besok</small></button><button type="button" data-when="date">Pilih tanggal<small>Kalender</small></button></div>
         <input type="date" class="booking-date" aria-label="Tanggal kedatangan" hidden>
