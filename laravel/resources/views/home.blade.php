@@ -85,6 +85,7 @@
             <div class="sticker sticker-orange">#aksata<br>cerita</div>
             <div class="scribble">Our kind of<br><b>FUN!</b></div>
         </div>
+        <div class="scroll-note">SCROLL TO EXPLORE <span>↓</span></div>
     </section>
 
     <section class="manifesto">
@@ -196,7 +197,7 @@
     </section>
 
     <section class="cta-section"><div class="cta-orbit orbit-one">SAY CHEESE · SAY CHEESE ·</div><div class="cta-stars">✦　✧　✦</div><h2>Ready to make<br>your own <i>story?</i></h2><p>Nggak perlu jago pose. Datang aja, sisanya biar kami yang bikin seru.</p><button class="btn btn-light" data-open-booking><x-icon name="camera" /> Mulai ceritamu</button></section>
-    <footer><div class="shell footer-top"><x-brand :light="true" /><div><b>Explore</b><a href="#paket">Paket &amp; Harga</a>@if ($s['show_frames'] === '1' && $frames->isNotEmpty())<a href="#frame">Katalog Frame</a>@endif @if ($gallery->isNotEmpty())<a href="#galeri">Galeri Momen</a>@endif</div><div><b>Social</b><a href="https://instagram.com/{{ $s['instagram'] }}" target="_blank" rel="noreferrer">{{ '@'.$s['instagram'] }} ↗</a>@if ($s['tiktok'] !== '')<a href="https://www.tiktok.com/@{{ $s['tiktok'] }}" target="_blank" rel="noreferrer">TikTok ↗</a>@endif @if ($s['facebook'] !== '')<a href="{{ $s['facebook'] }}" target="_blank" rel="noreferrer">Facebook ↗</a>@endif<a href="{{ $waText }}" target="_blank" rel="noreferrer">WhatsApp ↗</a></div><div class="footer-note">Made for<br><i>good stories.</i></div></div><div class="shell footer-bottom"><span>© {{ date('Y') }} AKSATACERITA PHOTOBOOTH · {{ strtoupper($s['city']) }}</span></div><div class="shell"><x-credit /></div></footer>
+    <footer><div class="shell footer-top"><x-brand :light="true" /><div><b>Explore</b><a href="#paket">Paket &amp; Harga</a>@if ($s['show_frames'] === '1' && $frames->isNotEmpty())<a href="#frame">Katalog Frame</a>@endif @if ($gallery->isNotEmpty())<a href="#galeri">Galeri Momen</a>@endif</div><div><b>Social</b><a href="https://instagram.com/{{ $s['instagram'] }}" target="_blank" rel="noreferrer">{{ '@'.$s['instagram'] }} ↗</a>@if ($s['tiktok'] !== '')<a href="https://www.tiktok.com/@{{ $s['tiktok'] }}" target="_blank" rel="noreferrer">TikTok ↗</a>@endif @if ($s['facebook'] !== '')<a href="{{ $s['facebook'] }}" target="_blank" rel="noreferrer">Facebook ↗</a>@endif<a href="{{ $waText }}" target="_blank" rel="noreferrer">WhatsApp ↗</a></div><div class="footer-note">Made for<br><i>good stories.</i></div></div><div class="shell footer-bottom"><span>© {{ date('Y') }} AKSATACERITA PHOTOBOOTH</span><span>{{ strtoupper($s['city']) }}</span></div><div class="shell"><x-credit /></div></footer>
     <a class="floating-wa" href="{{ $waText }}" target="_blank" rel="noreferrer" aria-label="Chat WhatsApp"><x-icon name="whatsapp" /></a>
     <div class="booking-backdrop" data-close-booking></div>
     <aside class="booking-drawer" aria-hidden="true">
