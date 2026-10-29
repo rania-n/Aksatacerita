@@ -233,7 +233,7 @@ class AksataTest extends TestCase
         $this->assertSame('', Setting::get('ticker'));
         $this->get('/')->assertOk()
             ->assertDontSee('class="ticker"', false)->assertDontSee('5 / 5')->assertDontSee('Try the booth')
-            ->assertSee('cid=12612606103040302155', false); // peta pakai CID Aksata Cerita Photobooth
+            ->assertSee('maps/embed?pb=', false); // peta embed Place ID Aksata Cerita
     }
 
     public function test_instagram_url_and_tiktok_handles_are_normalized(): void

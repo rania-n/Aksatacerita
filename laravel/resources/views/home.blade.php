@@ -10,8 +10,6 @@
     $hasPin = is_numeric($s['latitude']) && is_numeric($s['longitude']);
     $mapQuery = $hasPin ? $s['latitude'].','.$s['longitude'] : $s['studio_name'].' '.str_replace("\n", ' ', $s['address']);
     $mapsUrl = $s['maps_url'] ?: 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($mapQuery);
-    // Embed map: pakai CID dari Place ID Aksata Cerita Photobooth (paling akurat, tidak butuh API key)
-    $mapEmbedUrl = 'https://maps.google.com/maps?cid=12612606103040302155&output=embed&hl=id&z=18';
     $sameAs = array_values(array_filter([
         'https://instagram.com/'.$s['instagram'],
         $s['tiktok'] ? 'https://www.tiktok.com/@'.$s['tiktok'] : null,
@@ -92,7 +90,7 @@
     <section class="manifesto">
         <div class="shell manifesto-inner"><p>Bukan cuma foto.</p><h2>Ini cara kita <span>menyimpan</span><br>hari-hari paling seru.</h2><div class="mini-note">NO AWKWARD POSES.<br>JUST BE YOU.</div></div>
     </section>
-    <div class="moving-type"><div><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i></div></div>
+    <div class="moving-type"><div><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i><span>SMILE BIG</span><i>✦</i><span>KEEP THE STORY</span><i>✦</i><span>BE YOURSELF</span><i>✦</i></div></div>
 
     <section class="section shell" id="paket">
         <div class="section-heading"><div><span class="kicker">01 — PILIH CERITAMU</span><h2>Good moments,<br><i>fair prices.</i></h2></div><p>Dari foto formal sampai pose paling chaos—ada sesi untuk setiap cerita.</p></div>
@@ -187,7 +185,7 @@
     @endif
 
     <section class="visit" id="lokasi">
-        <div class="visit-map"><iframe title="Lokasi {{ $s['studio_name'] }}" src="{{ $mapEmbedUrl }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-stamp"><x-brand /><span>YOU'RE ALMOST HERE!</span></div></div>
+        <div class="visit-map"><iframe title="Lokasi {{ $s['studio_name'] }}" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d991.1886205!2d111.9158272!3d-8.0412672!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e78e3ab72caa8a1%3A0xaf08fa6d1fa41c4b!2sAksata+Cerita+Photobooth!5e0!3m2!1sid!2sid!4v1698580800000!5m2!1sid!2sid" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-stamp"><x-brand /><span>YOU'RE ALMOST HERE!</span></div></div>
         <div class="visit-copy">
             <span class="kicker">04 — COME SAY HI</span><h2>Sampai ketemu<br>di <i>studio!</i></h2>
             <div class="info-row"><x-icon name="map" /><div><b>{{ $s['studio_name'] }}</b><p>{!! nl2br(e($s['address'])) !!}</p></div></div>
