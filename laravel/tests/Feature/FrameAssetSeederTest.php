@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Frame;
 use App\Models\GalleryItem;
+use App\Models\Setting;
 use App\Models\User;
 use Database\Seeders\FrameAssetSeeder;
 use Database\Seeders\GalleryAssetSeeder;
@@ -135,5 +136,40 @@ class FrameAssetSeederTest extends TestCase
         $this->assertDatabaseMissing('frames', ['name' => 'Rusak']);
         $this->assertDatabaseMissing('gallery_items', ['title' => 'Rusak']);
         $this->assertDatabaseHas('gallery_items', ['title' => 'Remote']);
+    }
+
+    public function test_admin_can_upload_many_photos_at_once(): void
+    {
+        Storage::fake('public');
+        $this->withoutMiddleware(PreventRequestForgery::class);
+        $this->actingAs(User::factory()->create());
+
+        $this->post(route('admin.gallery.store'), [
+            'category' => 'Bestie',
+            'image' => [UploadedFile::fake()->image('hari-pertama.jpg'), UploadedFile::fake()->image('kedua.jpg')],
+        ])->assertRedirect(route('admin.gallery.index'));
+        $this->post(route('admin.frames.store'), [
+            'name' => 'Seri Pink',
+            'type' => 'Frame Biasa',
+            'image' => [UploadedFile::fake()->image('a.png'), UploadedFile::fake()->image('b.png'), UploadedFile::fake()->image('c.png')],
+        ])->assertRedirect(route('admin.frames.index'));
+
+        $this->assertSame(['Hari Pertama', 'Kedua'], GalleryItem::orderBy('sort_order')->pluck('title')->all());
+        $this->assertSame(['Seri Pink 1', 'Seri Pink 2', 'Seri Pink 3'], Frame::orderBy('sort_order')->pluck('name')->all());
+    }
+
+    public function test_landing_page_hides_empty_categories_and_offers_show_all_for_many_photos(): void
+    {
+        foreach (range(1, 8) as $i) {
+            GalleryItem::create(['title' => "Foto {$i}", 'category' => 'Bestie', 'image_path' => 'https://example.com/a.jpg']);
+        }
+        GalleryItem::create(['title' => 'Solo', 'category' => 'Solo', 'image_path' => 'https://example.com/b.jpg', 'is_active' => false]);
+        Setting::put(['gallery_categories' => 'Bestie, Solo, Wisuda']);
+
+        $this->get('/')
+            ->assertSee('gallery-toggle-btn', false)
+            ->assertSee('Lihat semua cerita (8)')
+            ->assertDontSee('<button data-cat="Wisuda"', false)
+            ->assertDontSee('<button data-cat="Solo"', false);
     }
 }

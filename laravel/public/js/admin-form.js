@@ -184,7 +184,8 @@
       const label = f.label.value.trim().toUpperCase();
       setText(q('label'), label);
       toggle(q('label'), label !== '');
-      const file = f.image.files && f.image.files[0];
+      const input = f['image[]'] || f.image;
+      const file = input.files && input.files[0];
       if (blob) { URL.revokeObjectURL(blob); blob = null; }
       if (file) blob = URL.createObjectURL(file);
       const src = blob || original;
@@ -208,7 +209,8 @@
     const update = () => {
       setText(q('title'), f.title.value.trim() || 'Judul foto');
       setText(q('category'), f.category.value || '');
-      const file = f.image.files && f.image.files[0];
+      const input = f['image[]'] || f.image;
+      const file = input.files && input.files[0];
       if (blob) { URL.revokeObjectURL(blob); blob = null; }
       if (file) blob = URL.createObjectURL(file);
       const src = blob || original;

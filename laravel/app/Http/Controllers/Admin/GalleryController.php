@@ -8,7 +8,9 @@ use App\Models\Media;
 use App\Models\Setting;
 use App\Support\ImageUploader;
 use App\Support\SeedAssets;
+use App\Support\UploadName;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class GalleryController extends Controller
 {
@@ -37,22 +39,27 @@ class GalleryController extends Controller
 
     public function store(Request $request)
     {
-        $v = $this->validated($request, imageRequired: true);
-        $item = GalleryItem::create([
-            'title' => trim($v['title']),
-            'category' => $v['category'],
-            'image_path' => ImageUploader::store($request->file('image'), 'gallery', 1600),
-            'is_active' => $request->boolean('is_active'),
-            'sort_order' => (GalleryItem::max('sort_order') ?? -1) + 1,
-        ]);
-        SeedAssets::sync($item->image_path, SeedAssets::galleryFolder($item->category), $item->only(['title']));
+        $v = $this->validated($request, creating: true);
+        $files = Arr::wrap($request->file('image'));
+        $nextOrder = (GalleryItem::max('sort_order') ?? -1) + 1;
 
-        return redirect()->route('admin.gallery.index')->with('ok', 'Foto ditambahkan.');
+        foreach ($files as $i => $file) {
+            $item = GalleryItem::create([
+                'title' => UploadName::for($v['title'] ?? null, $file, $i, count($files), 80),
+                'category' => $v['category'],
+                'image_path' => ImageUploader::store($file, 'gallery', 1600),
+                'is_active' => $request->boolean('is_active'),
+                'sort_order' => $nextOrder + $i,
+            ]);
+            SeedAssets::sync($item->image_path, SeedAssets::galleryFolder($item->category), $item->only(['title']));
+        }
+
+        return redirect()->route('admin.gallery.index')->with('ok', count($files) > 1 ? count($files).' foto ditambahkan.' : 'Foto ditambahkan.');
     }
 
     public function update(Request $request, GalleryItem $item)
     {
-        $v = $this->validated($request, imageRequired: false, current: $item->category);
+        $v = $this->validated($request, creating: false);
         $data = ['title' => trim($v['title']), 'category' => $v['category'], 'is_active' => $request->boolean('is_active')];
         if ($request->hasFile('image')) {
             Media::delete($item->image_path);
@@ -74,14 +81,18 @@ class GalleryController extends Controller
         return redirect()->route('admin.gallery.index')->with('ok', 'Foto dihapus.');
     }
 
-    private function validated(Request $request, bool $imageRequired, ?string $current = null): array
+    private function validated(Request $request, bool $creating): array
     {
         $request->merge(['category' => trim((string) $request->input('category'))]);
+        if ($creating) {
+            UploadName::normalize($request);
+        }
 
         $v = $request->validate([
-            'title' => ['required', 'string', 'max:80'],
+            'title' => [$creating ? 'nullable' : 'required', 'string', 'max:80'],
             'category' => ['required', 'string', 'max:30'],
-            'image' => [$imageRequired ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
+            'image' => $creating ? ['required', 'array', 'max:20'] : ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
+            'image.*' => $creating ? ['image', 'mimes:jpg,jpeg,png,webp', 'max:6144'] : [],
         ]);
 
         Setting::addToList('gallery_categories', $v['category']);

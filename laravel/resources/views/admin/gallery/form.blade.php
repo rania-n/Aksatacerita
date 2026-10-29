@@ -10,11 +10,11 @@
         <div class="panel-head"><div><span>{{ $e ? 'UBAH FOTO' : 'FOTO BARU' }}</span><h2>{{ $e ? $e->title : 'Unggah foto' }}</h2></div><small class="req-note"><i class="req">*</i> wajib diisi</small></div>
 
         <label>Foto @unless ($e)<i class="req">*</i>@endunless
-            <input type="file" name="image" accept="image/png,image/jpeg,image/webp" @required(! $e)>
-            <span class="hint">@if ($e)Pilih file baru hanya bila ingin mengganti foto. @endif JPG, PNG, atau WebP, maksimal 6 MB.</span>@error('image')<span class="error">{{ $message }}</span>@enderror
+            <input type="file" name="{{ $e ? 'image' : 'image[]' }}" accept="image/png,image/jpeg,image/webp" @required(! $e) @if (! $e) multiple @endif>
+            <span class="hint">@if ($e)Pilih file baru hanya bila ingin mengganti foto. @else Bisa pilih banyak foto sekaligus (maksimal 20). Judul dikosongkan = pakai nama berkas, diisi = diberi nomor urut. @endif JPG, PNG, atau WebP, maksimal 6 MB per foto.</span>@error('image')<span class="error">{{ $message }}</span>@enderror @error('image.*')<span class="error">{{ $message }}</span>@enderror
         </label>
 
-        <label>Judul <i class="req">*</i><input name="title" value="{{ old('title', $e->title ?? '') }}" required maxlength="80" placeholder="Contoh: Sunday with besties">@error('title')<span class="error">{{ $message }}</span>@enderror</label>
+        <label>Judul @if ($e)<i class="req">*</i>@endif<input name="title" value="{{ old('title', $e->title ?? '') }}" @required($e) maxlength="80" placeholder="Contoh: Sunday with besties">@error('title')<span class="error">{{ $message }}</span>@enderror</label>
 
         @php $selectedCategory = old('category', $e->category ?? $categories[0] ?? ''); @endphp
         <div class="field">

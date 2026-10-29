@@ -158,7 +158,7 @@ class AksataTest extends TestCase
         Storage::disk('public')->assertExists($item->image_path);
 
         $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Event'])->assertSessionHasErrors('image');
-        $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Event', 'image' => UploadedFile::fake()->create('virus.php', 10)])->assertSessionHasErrors('image');
+        $this->post('/admin/galeri', ['title' => 'x', 'category' => 'Event', 'image' => UploadedFile::fake()->create('virus.php', 10)])->assertSessionHasErrors('image.0');
         $this->post('/admin/galeri', ['title' => 'x', 'category' => '', 'image' => UploadedFile::fake()->image('c.jpg')])->assertSessionHasErrors('category');
 
         $this->delete("/admin/galeri/{$item->id}")->assertRedirect('/admin/galeri');
@@ -416,7 +416,7 @@ class AksataTest extends TestCase
 
         $item = GalleryItem::create(['title' => 'Lama', 'category' => 'Event', 'image_path' => 'https://example.com/a.jpg']);
         $this->get("/admin/galeri/{$item->id}/ubah")->assertOk()->assertSee('value="Event"', false);
-        $this->get('/')->assertSee('data-cat="Event"', false)->assertSee('data-cat="Prewedding"', false);
+        $this->get('/')->assertSee('data-cat="Event"', false)->assertDontSee('data-cat="Prewedding"', false);
     }
 
     public function test_account_update_requires_current_password(): void

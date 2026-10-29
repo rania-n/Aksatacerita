@@ -9,7 +9,7 @@
     <div class="panel admin-form">
         <div class="panel-head"><div><span>{{ $e ? 'UBAH FRAME' : 'FRAME BARU' }}</span><h2>{{ $e ? $e->name : 'Isi data frame' }}</h2></div><small class="req-note"><i class="req">*</i> wajib diisi</small></div>
 
-        <label>Nama frame <i class="req">*</i><input name="name" value="{{ old('name', $f->name) }}" required maxlength="60" placeholder="Contoh: Retro Blue">@error('name')<span class="error">{{ $message }}</span>@enderror</label>
+        <label>Nama frame @if ($e)<i class="req">*</i>@endif<input name="name" value="{{ old('name', $f->name) }}" @required($e) maxlength="60" placeholder="Contoh: Retro Blue">@error('name')<span class="error">{{ $message }}</span>@enderror</label>
 
         <label>Jenis frame<input name="type" id="f-type" value="{{ old('type', $f->type) }}" maxlength="30" placeholder="Contoh: Frame Biasa"><span class="hint">Dipakai untuk menyaring frame di website. Klik pilihan atau ketik jenis baru.</span>@error('type')<span class="error">{{ $message }}</span>@enderror</label>
         <x-chips target="f-type" list="frame_type" :items="$typeOptions" />
@@ -21,8 +21,8 @@
         <x-chips target="f-label" list="frame_label" :items="$labelOptions" />
 
         <label>Foto frame @unless ($e)<i class="req">*</i>@endunless
-            <input type="file" name="image" accept="image/png,image/jpeg,image/webp" @required(! $e)>
-            <span class="hint">@if ($e?->image_url)Sudah ada gambar. Pilih file baru hanya bila ingin menggantinya. @endif JPG, PNG, atau WebP, maksimal 10 MB (otomatis dikecilkan &amp; dikompres). PNG transparan tetap transparan.</span>@error('image')<span class="error">{{ $message }}</span>@enderror
+            <input type="file" name="{{ $e ? 'image' : 'image[]' }}" accept="image/png,image/jpeg,image/webp" @required(! $e) @if (! $e) multiple @endif>
+            <span class="hint">@if ($e?->image_url)Sudah ada gambar. Pilih file baru hanya bila ingin menggantinya. @else Bisa pilih banyak frame sekaligus (maksimal 20); nama dikosongkan = pakai nama berkas, diisi = diberi nomor urut. @endif JPG, PNG, atau WebP, maksimal 10 MB per frame (otomatis dikecilkan &amp; dikompres). PNG transparan tetap transparan.</span>@error('image')<span class="error">{{ $message }}</span>@enderror
         </label>
 
         <label class="check"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $f->is_active ?? true))> Tampilkan di website</label>
