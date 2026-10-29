@@ -43,8 +43,13 @@ class SeedAssets
         return trim($directory, '/').'/'.$name;
     }
 
-    /** Salin berkas di disk public ke folder aset; salinan lama di folder lain (mis. jenis berubah) dihapus. */
-    public static function sync(?string $storedPath, string $folder): void
+    /**
+     * Salin berkas di disk public ke folder aset dan catat metadatanya (nama, ukuran, label, judul) di manifest.json.
+     * Salinan lama di folder lain (mis. jenis berubah) dihapus.
+     *
+     * @param  array<string, string|null>  $meta
+     */
+    public static function sync(?string $storedPath, string $folder, array $meta = []): void
     {
         if (! self::enabled($storedPath) || ! Storage::disk('public')->exists($storedPath)) {
             return;
@@ -58,6 +63,28 @@ class SeedAssets
         }
 
         copy(Storage::disk('public')->path($storedPath), $target.'/'.basename($storedPath));
+
+        $manifest = self::manifest();
+        $manifest["{$folder}/".basename($storedPath)] = array_filter($meta, fn ($value) => $value !== null && $value !== '');
+        self::saveManifest($manifest);
+    }
+
+    /**
+     * Metadata berkas aset dari manifest.json, kunci "FOLDER/berkas".
+     *
+     * @return array<string, string>
+     */
+    public static function meta(string $key): array
+    {
+        return self::manifest()[$key] ?? [];
+    }
+
+    /** Hapus baris model yang gambar lokalnya tidak ada lagi di disk (mis. file upload orang lain yang tidak ikut git). */
+    public static function pruneMissing(string $modelClass): void
+    {
+        $modelClass::query()->get()
+            ->filter(fn ($row) => $row->image_path && ! str_starts_with($row->image_path, 'http') && ! Storage::disk('public')->exists($row->image_path))
+            ->each->delete();
     }
 
     public static function forget(?string $storedPath): void
@@ -69,6 +96,33 @@ class SeedAssets
         foreach (glob(database_path('seeders/assets/{*,GALERI/*}/'.basename($storedPath)), GLOB_BRACE) ?: [] as $copy) {
             unlink($copy);
         }
+
+        $manifest = self::manifest();
+        $remaining = array_filter($manifest, fn (string $key) => basename($key) !== basename($storedPath), ARRAY_FILTER_USE_KEY);
+
+        if (count($remaining) !== count($manifest)) {
+            self::saveManifest($remaining);
+        }
+    }
+
+    /** @return array<string, array<string, string>> */
+    private static function manifest(): array
+    {
+        $file = database_path('seeders/assets/manifest.json');
+
+        return is_file($file) ? (json_decode(file_get_contents($file), true) ?: []) : [];
+    }
+
+    /** @param  array<string, array<string, string>>  $manifest */
+    private static function saveManifest(array $manifest): void
+    {
+        ksort($manifest);
+        $file = database_path('seeders/assets/manifest.json');
+        is_dir(dirname($file)) || mkdir(dirname($file), 0775, true);
+        file_put_contents(
+            $file,
+            json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n",
+        );
     }
 
     private static function enabled(?string $storedPath): bool

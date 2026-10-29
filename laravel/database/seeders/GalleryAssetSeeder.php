@@ -31,8 +31,10 @@ class GalleryAssetSeeder extends Seeder
                     $disk->put($imagePath, file_get_contents($file));
                 }
 
+                $meta = SeedAssets::meta(SeedAssets::GALLERY_FOLDER."/{$category}/".basename($file));
+
                 GalleryItem::firstOrCreate(['image_path' => $imagePath], [
-                    'title' => sprintf('%s %02d', $category, $index + 1),
+                    'title' => $meta['title'] ?? sprintf('%s %02d', $category, $index + 1),
                     'category' => $category,
                     'sort_order' => $sortOrder,
                     'is_active' => true,
@@ -43,5 +45,7 @@ class GalleryAssetSeeder extends Seeder
 
             Setting::addToList('gallery_categories', $category);
         }
+
+        SeedAssets::pruneMissing(GalleryItem::class);
     }
 }

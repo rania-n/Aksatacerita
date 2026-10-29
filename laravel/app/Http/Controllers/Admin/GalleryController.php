@@ -45,7 +45,7 @@ class GalleryController extends Controller
             'is_active' => $request->boolean('is_active'),
             'sort_order' => (GalleryItem::max('sort_order') ?? -1) + 1,
         ]);
-        SeedAssets::sync($item->image_path, SeedAssets::galleryFolder($item->category));
+        SeedAssets::sync($item->image_path, SeedAssets::galleryFolder($item->category), $item->only(['title']));
 
         return redirect()->route('admin.gallery.index')->with('ok', 'Foto ditambahkan.');
     }
@@ -60,7 +60,7 @@ class GalleryController extends Controller
             $data['image_path'] = ImageUploader::store($request->file('image'), 'gallery', 1600);
         }
         $item->update($data);
-        SeedAssets::sync($item->image_path, SeedAssets::galleryFolder($item->category));
+        SeedAssets::sync($item->image_path, SeedAssets::galleryFolder($item->category), $item->only(['title']));
 
         return redirect()->route('admin.gallery.index')->with('ok', 'Foto diperbarui.');
     }

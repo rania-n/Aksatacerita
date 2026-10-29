@@ -44,10 +44,13 @@ class FrameAssetSeeder extends Seeder
                     $disk->put($imagePath, file_get_contents($file));
                 }
 
+                $meta = SeedAssets::meta("{$folder}/".basename($file));
+
                 Frame::firstOrCreate(['image_path' => $imagePath], [
-                    'name' => sprintf('%s %02d', $prefix, $index + 1),
+                    'name' => $meta['name'] ?? sprintf('%s %02d', $prefix, $index + 1),
+                    'label' => $meta['label'] ?? null,
                     'type' => $type,
-                    'size' => $this->sizeFor($type, basename($file)),
+                    'size' => $meta['size'] ?? $this->sizeFor($type, basename($file)),
                     'sort_order' => $sortOrder,
                     'is_active' => true,
                 ]);
@@ -57,6 +60,8 @@ class FrameAssetSeeder extends Seeder
 
             Setting::addToList('options_frame_type', $type);
         }
+
+        SeedAssets::pruneMissing(Frame::class);
     }
 
     private function sizeFor(string $type, string $fileName): ?string

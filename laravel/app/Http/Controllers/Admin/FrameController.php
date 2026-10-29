@@ -33,7 +33,7 @@ class FrameController extends Controller
         $data = $this->data($request);
         $data['sort_order'] = (Frame::max('sort_order') ?? -1) + 1;
         $frame = Frame::create($data + ['color' => Palette::DEFAULT]);
-        SeedAssets::sync($frame->image_path, SeedAssets::frameFolder($frame->type));
+        SeedAssets::sync($frame->image_path, SeedAssets::frameFolder($frame->type), $frame->only(['name', 'label', 'size']));
 
         return redirect()->route('admin.frames.index')->with('ok', 'Frame ditambahkan.');
     }
@@ -46,7 +46,7 @@ class FrameController extends Controller
             SeedAssets::forget($frame->image_path);
         }
         $frame->update($data);
-        SeedAssets::sync($frame->image_path, SeedAssets::frameFolder($frame->type));
+        SeedAssets::sync($frame->image_path, SeedAssets::frameFolder($frame->type), $frame->only(['name', 'label', 'size']));
 
         return redirect()->route('admin.frames.index')->with('ok', 'Frame diperbarui.');
     }

@@ -58,7 +58,7 @@ class FrameAssetSeederTest extends TestCase
 
         $this->assertGreaterThan(0, $assetCount);
         $this->assertSame($assetCount, GalleryItem::count());
-        $this->assertContains('Talent', GalleryItem::pluck('category')->all());
+        $this->assertContains('Couple', GalleryItem::pluck('category')->all());
         GalleryItem::all()->each(fn (GalleryItem $item) => Storage::disk('public')->assertExists($item->image_path));
     }
 
@@ -91,5 +91,49 @@ class FrameAssetSeederTest extends TestCase
         $this->actingAs($admin)->delete(route('admin.frames.destroy', $frame))->assertRedirect();
 
         $this->assertFileDoesNotExist($assets.'/seeders/assets/FRAME KORAN/'.basename($frame->image_path));
+    }
+
+    public function test_manifest_keeps_admin_names_and_titles_for_other_databases(): void
+    {
+        Storage::fake('public');
+        $assets = sys_get_temp_dir().'/seed-assets-'.uniqid();
+        mkdir($assets);
+        $this->withoutMiddleware(PreventRequestForgery::class);
+        $this->app->useDatabasePath($assets);
+        $this->app['env'] = 'local';
+        $admin = User::factory()->create();
+
+        $this->actingAs($admin)->post(route('admin.frames.store'), [
+            'name' => 'Leopard Pink', 'type' => 'Frame Koran', 'size' => '2r', 'label' => 'baru',
+            'image' => UploadedFile::fake()->image('a.png', 100, 100),
+        ]);
+        $this->actingAs($admin)->post(route('admin.gallery.store'), [
+            'title' => 'Hari Wisuda', 'category' => 'Wisuda',
+            'image' => UploadedFile::fake()->image('b.jpg', 100, 100),
+        ]);
+
+        Frame::query()->delete();
+        GalleryItem::query()->delete();
+        Storage::fake('public');
+        $this->seed(FrameAssetSeeder::class);
+        $this->seed(GalleryAssetSeeder::class);
+
+        $this->assertDatabaseHas('frames', ['name' => 'Leopard Pink', 'size' => '2R', 'label' => 'BARU', 'type' => 'Frame Koran']);
+        $this->assertDatabaseHas('gallery_items', ['title' => 'Hari Wisuda', 'category' => 'Wisuda']);
+    }
+
+    public function test_seeders_remove_rows_whose_image_file_no_longer_exists(): void
+    {
+        Storage::fake('public');
+        Frame::create(['name' => 'Rusak', 'image_path' => 'frames/hilang.webp']);
+        GalleryItem::create(['title' => 'Rusak', 'category' => 'Event', 'image_path' => 'gallery/hilang.webp']);
+        GalleryItem::create(['title' => 'Remote', 'category' => 'Event', 'image_path' => 'https://example.com/a.jpg']);
+
+        $this->seed(FrameAssetSeeder::class);
+        $this->seed(GalleryAssetSeeder::class);
+
+        $this->assertDatabaseMissing('frames', ['name' => 'Rusak']);
+        $this->assertDatabaseMissing('gallery_items', ['title' => 'Rusak']);
+        $this->assertDatabaseHas('gallery_items', ['title' => 'Remote']);
     }
 }
