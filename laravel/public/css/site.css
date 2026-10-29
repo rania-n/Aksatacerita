@@ -16,8 +16,8 @@ button { cursor:pointer; }
 .brand-mark { width:31px;height:31px;border:2px solid currentColor;border-radius:50%;display:grid;place-items:center; }
 .brand-light { color:white; }
 .official-brand { display:block;width:162px;height:54px;overflow:hidden;background:var(--blue);flex:none; }
-.brand-crop { display:block;width:100%;height:100%;overflow:hidden;position:relative; }
-.brand-crop img { position:absolute;width:176px;height:176px;max-width:none;left:50%;top:50%;transform:translate(-50%,-50%);object-fit:cover; }
+.brand-crop { display:flex;align-items:center;justify-content:center;width:100%;height:100%;overflow:hidden; }
+.brand-crop img { width:100%;height:100%;object-fit:contain;display:block; }
 .nav-links { display:flex;gap:30px;font:600 13px "Space Grotesk"; }
 .nav-links a { transition:.2s; }
 .nav-links a:hover { color:var(--blue); transform:translateY(-2px); }
