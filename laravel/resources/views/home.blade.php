@@ -10,6 +10,8 @@
     $hasPin = is_numeric($s['latitude']) && is_numeric($s['longitude']);
     $mapQuery = $hasPin ? $s['latitude'].','.$s['longitude'] : $s['studio_name'].' '.str_replace("\n", ' ', $s['address']);
     $mapsUrl = $s['maps_url'] ?: 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($mapQuery);
+    // Embed map: pakai CID dari Place ID Aksata Cerita Photobooth (paling akurat, tidak butuh API key)
+    $mapEmbedUrl = 'https://maps.google.com/maps?cid=12612606103040302155&output=embed&hl=id&z=18';
     $sameAs = array_values(array_filter([
         'https://instagram.com/'.$s['instagram'],
         $s['tiktok'] ? 'https://www.tiktok.com/@'.$s['tiktok'] : null,
@@ -185,7 +187,7 @@
     @endif
 
     <section class="visit" id="lokasi">
-        <div class="visit-map"><iframe title="Lokasi {{ $s['studio_name'] }}" src="https://maps.google.com/maps?q={{ rawurlencode($hasPin ? $s['latitude'].','.$s['longitude'] : $mapQuery) }}&amp;z=18&amp;hl=id&amp;output=embed&amp;iwloc=near" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-stamp"><x-brand /><span>YOU'RE ALMOST HERE!</span></div></div>
+        <div class="visit-map"><iframe title="Lokasi {{ $s['studio_name'] }}" src="{{ $mapEmbedUrl }}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-stamp"><x-brand /><span>YOU'RE ALMOST HERE!</span></div></div>
         <div class="visit-copy">
             <span class="kicker">04 — COME SAY HI</span><h2>Sampai ketemu<br>di <i>studio!</i></h2>
             <div class="info-row"><x-icon name="map" /><div><b>{{ $s['studio_name'] }}</b><p>{!! nl2br(e($s['address'])) !!}</p></div></div>

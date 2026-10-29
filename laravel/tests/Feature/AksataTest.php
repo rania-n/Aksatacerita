@@ -221,7 +221,7 @@ class AksataTest extends TestCase
         $this->put('/admin/info', $this->settingsPayload(['latitude' => '95']))->assertSessionHasErrors('latitude');
         $this->put('/admin/info', $this->settingsPayload(['longitude' => null]))->assertSessionHasErrors('longitude');
         $this->put('/admin/info', $this->settingsPayload(['instagram' => 'a b!']))->assertSessionHasErrors('instagram');
-        $this->assertSame('Aksata Cerita Photobooth', Setting::get('studio_name'));
+        $this->assertSame('Ruma Pinara', Setting::get('studio_name'));
     }
 
     public function test_settings_optional_fields_can_be_cleared_and_pin_is_optional(): void
@@ -233,7 +233,7 @@ class AksataTest extends TestCase
         $this->assertSame('', Setting::get('ticker'));
         $this->get('/')->assertOk()
             ->assertDontSee('class="ticker"', false)->assertDontSee('5 / 5')->assertDontSee('Try the booth')
-            ->assertSee('q=Studio%20Baru', false); // peta jatuh ke pencarian alamat
+            ->assertSee('cid=12612606103040302155', false); // peta pakai CID Aksata Cerita Photobooth
     }
 
     public function test_instagram_url_and_tiktok_handles_are_normalized(): void
