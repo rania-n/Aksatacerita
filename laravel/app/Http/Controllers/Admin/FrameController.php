@@ -8,6 +8,7 @@ use App\Models\Media;
 use App\Models\Setting;
 use App\Support\ImageUploader;
 use App\Support\Palette;
+use App\Support\SeedAssets;
 use Illuminate\Http\Request;
 
 class FrameController extends Controller
@@ -31,7 +32,8 @@ class FrameController extends Controller
     {
         $data = $this->data($request);
         $data['sort_order'] = (Frame::max('sort_order') ?? -1) + 1;
-        Frame::create($data + ['color' => Palette::DEFAULT]);
+        $frame = Frame::create($data + ['color' => Palette::DEFAULT]);
+        SeedAssets::sync($frame->image_path, SeedAssets::frameFolder($frame->type));
 
         return redirect()->route('admin.frames.index')->with('ok', 'Frame ditambahkan.');
     }
@@ -41,8 +43,10 @@ class FrameController extends Controller
         $data = $this->data($request);
         if (isset($data['image_path'])) {
             Media::delete($frame->image_path);
+            SeedAssets::forget($frame->image_path);
         }
         $frame->update($data);
+        SeedAssets::sync($frame->image_path, SeedAssets::frameFolder($frame->type));
 
         return redirect()->route('admin.frames.index')->with('ok', 'Frame diperbarui.');
     }
@@ -50,6 +54,7 @@ class FrameController extends Controller
     public function destroy(Frame $frame)
     {
         Media::delete($frame->image_path);
+        SeedAssets::forget($frame->image_path);
         $frame->delete();
 
         return redirect()->route('admin.frames.index')->with('ok', 'Frame dihapus.');

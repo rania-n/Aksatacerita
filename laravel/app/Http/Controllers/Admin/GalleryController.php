@@ -7,6 +7,7 @@ use App\Models\GalleryItem;
 use App\Models\Media;
 use App\Models\Setting;
 use App\Support\ImageUploader;
+use App\Support\SeedAssets;
 use Illuminate\Http\Request;
 
 class GalleryController extends Controller
@@ -37,13 +38,14 @@ class GalleryController extends Controller
     public function store(Request $request)
     {
         $v = $this->validated($request, imageRequired: true);
-        GalleryItem::create([
+        $item = GalleryItem::create([
             'title' => trim($v['title']),
             'category' => $v['category'],
             'image_path' => ImageUploader::store($request->file('image'), 'gallery', 1600),
             'is_active' => $request->boolean('is_active'),
             'sort_order' => (GalleryItem::max('sort_order') ?? -1) + 1,
         ]);
+        SeedAssets::sync($item->image_path, SeedAssets::galleryFolder($item->category));
 
         return redirect()->route('admin.gallery.index')->with('ok', 'Foto ditambahkan.');
     }
@@ -54,9 +56,11 @@ class GalleryController extends Controller
         $data = ['title' => trim($v['title']), 'category' => $v['category'], 'is_active' => $request->boolean('is_active')];
         if ($request->hasFile('image')) {
             Media::delete($item->image_path);
+            SeedAssets::forget($item->image_path);
             $data['image_path'] = ImageUploader::store($request->file('image'), 'gallery', 1600);
         }
         $item->update($data);
+        SeedAssets::sync($item->image_path, SeedAssets::galleryFolder($item->category));
 
         return redirect()->route('admin.gallery.index')->with('ok', 'Foto diperbarui.');
     }
@@ -64,6 +68,7 @@ class GalleryController extends Controller
     public function destroy(GalleryItem $item)
     {
         Media::delete($item->image_path);
+        SeedAssets::forget($item->image_path);
         $item->delete();
 
         return redirect()->route('admin.gallery.index')->with('ok', 'Foto dihapus.');
