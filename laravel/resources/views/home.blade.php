@@ -70,7 +70,7 @@
             @if ($s['proof_show'] === '1' && ($s['proof_rating'] !== '' || $s['proof_text'] !== ''))
             <div class="hero-proof">
                 @if ($photos->isNotEmpty())<div class="avatar-stack">@foreach (range(0, min(2, $photos->count() - 1)) as $i)<img src="{{ $p($i) }}" alt="">@endforeach</div>@endif
-                <div class="proof-labels"><b class="proof-rate">{{ $s['proof_rating'] }}</b><span class="proof-sub">{{ $s['proof_text'] }}</span></div>
+                <div><b>{{ $s['proof_rating'] }}</b><span>{{ $s['proof_text'] }}</span></div>
             </div>
             @endif
         </div>
@@ -172,7 +172,6 @@
         <div class="gallery-title"><span class="kicker">03 — TEMAN CERITA</span><h2>Real people.<br><i>Real fun.</i></h2><p>Tag <b>{{ '@'.$s['instagram'] }}</b> supaya ceritamu bisa ikut tampil di sini.</p></div>
         <div class="filters">@foreach ($categories->prepend('Semua') as $cat)<button data-cat="{{ $cat }}" class="{{ $loop->first ? 'active' : '' }}">{{ $cat }}</button>@endforeach</div>
         <div class="masonry">@foreach ($gallery as $item)<figure data-cat="{{ $item->category }}"><img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy"><figcaption><span>{{ $item->category }}</span><b>{{ $item->title }}</b></figcaption></figure>@endforeach</div>
-        <div class="gallery-more" hidden><button type="button" class="btn btn-dark gallery-toggle-btn">Lihat semua cerita ({{ $gallery->count() }}) <x-icon name="arrow" /></button></div>
     </section>
 
     @endif
@@ -186,7 +185,7 @@
     @endif
 
     <section class="visit" id="lokasi">
-        <div class="visit-map"><iframe title="Lokasi {{ $s['studio_name'] }}" src="https://maps.google.com/maps?q={{ rawurlencode($mapQuery) }}&amp;z=17&amp;hl=id&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-stamp"><x-brand /><span>YOU'RE ALMOST HERE!</span></div></div>
+        <div class="visit-map"><iframe title="Lokasi {{ $s['studio_name'] }}" src="https://maps.google.com/maps?q={{ rawurlencode($hasPin ? $s['latitude'].','.$s['longitude'] : $mapQuery) }}&amp;z=18&amp;hl=id&amp;output=embed&amp;iwloc=near" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="map-stamp"><x-brand /><span>YOU'RE ALMOST HERE!</span></div></div>
         <div class="visit-copy">
             <span class="kicker">04 — COME SAY HI</span><h2>Sampai ketemu<br>di <i>studio!</i></h2>
             <div class="info-row"><x-icon name="map" /><div><b>{{ $s['studio_name'] }}</b><p>{!! nl2br(e($s['address'])) !!}</p></div></div>
