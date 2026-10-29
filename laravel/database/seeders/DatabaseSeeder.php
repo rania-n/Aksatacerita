@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Frame;
 use App\Models\GalleryItem;
 use App\Models\Package;
 use App\Models\User;
@@ -27,16 +26,7 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        if (Frame::count() === 0) {
-            foreach ([
-                ['Retro Blue', 'SIGNATURE', '#0022ff'],
-                ['Tangerine Day', 'NEW DROP', '#ff6738'],
-                ['Garden Club', 'LIMITED', '#b7e433'],
-                ['Pink Crush', 'FAVORITE', '#ff79b8'],
-            ] as $i => [$name, $label, $color]) {
-                Frame::create(compact('name', 'label', 'color') + ['sort_order' => $i]);
-            }
-        }
+        $this->call(FrameAssetSeeder::class);
 
         if (GalleryItem::count() === 0) {
             $u = fn (string $id) => "https://images.unsplash.com/photo-{$id}?auto=format&fit=crop&w=900&q=85";
