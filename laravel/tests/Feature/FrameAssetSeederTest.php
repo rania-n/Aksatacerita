@@ -138,7 +138,7 @@ class FrameAssetSeederTest extends TestCase
         $this->assertDatabaseHas('gallery_items', ['title' => 'Remote']);
     }
 
-    public function test_admin_can_upload_many_photos_at_once(): void
+    public function test_admin_can_upload_many_files_at_once_with_a_name_for_each(): void
     {
         Storage::fake('public');
         $this->withoutMiddleware(PreventRequestForgery::class);
@@ -146,16 +146,49 @@ class FrameAssetSeederTest extends TestCase
 
         $this->post(route('admin.gallery.store'), [
             'category' => 'Bestie',
-            'image' => [UploadedFile::fake()->image('hari-pertama.jpg'), UploadedFile::fake()->image('kedua.jpg')],
+            'image' => [UploadedFile::fake()->image('a.jpg'), UploadedFile::fake()->image('b.jpg')],
+            'names' => ['Hari Pertama', 'Kedua'],
         ])->assertRedirect(route('admin.gallery.index'));
         $this->post(route('admin.frames.store'), [
-            'name' => 'Seri Pink',
             'type' => 'Frame Biasa',
-            'image' => [UploadedFile::fake()->image('a.png'), UploadedFile::fake()->image('b.png'), UploadedFile::fake()->image('c.png')],
+            'image' => [UploadedFile::fake()->image('a.png'), UploadedFile::fake()->image('b.png')],
+            'names' => ['Pink Satu', 'Pink Dua'],
         ])->assertRedirect(route('admin.frames.index'));
 
         $this->assertSame(['Hari Pertama', 'Kedua'], GalleryItem::orderBy('sort_order')->pluck('title')->all());
-        $this->assertSame(['Seri Pink 1', 'Seri Pink 2', 'Seri Pink 3'], Frame::orderBy('sort_order')->pluck('name')->all());
+        $this->assertSame(['Pink Satu', 'Pink Dua'], Frame::orderBy('sort_order')->pluck('name')->all());
+    }
+
+    public function test_every_file_needs_a_name_and_single_upload_needs_a_title(): void
+    {
+        Storage::fake('public');
+        $this->withoutMiddleware(PreventRequestForgery::class);
+        $this->actingAs(User::factory()->create());
+        $two = fn () => [UploadedFile::fake()->image('a.jpg'), UploadedFile::fake()->image('b.jpg')];
+
+        $this->post(route('admin.gallery.store'), ['category' => 'Bestie', 'image' => $two()])->assertSessionHasErrors('names');
+        $this->post(route('admin.gallery.store'), ['category' => 'Bestie', 'image' => $two(), 'names' => ['Satu', '']])->assertSessionHasErrors('names.1');
+        $this->post(route('admin.gallery.store'), ['category' => 'Bestie', 'image' => $two(), 'names' => ['Satu']])->assertSessionHasErrors('names');
+        $this->post(route('admin.gallery.store'), ['category' => 'Bestie', 'image' => UploadedFile::fake()->image('a.jpg')])->assertSessionHasErrors('title');
+        $this->post(route('admin.frames.store'), ['image' => UploadedFile::fake()->image('a.png')])->assertSessionHasErrors('name');
+
+        $this->assertSame(0, GalleryItem::count() + Frame::count());
+    }
+
+    public function test_reorder_can_jump_straight_to_a_position(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $items = collect(range(0, 4))->map(fn ($i) => GalleryItem::create(['title' => "F{$i}", 'category' => 'Event', 'image_path' => 'https://x.test/a.jpg', 'sort_order' => $i]));
+        $titles = fn () => GalleryItem::orderBy('sort_order')->pluck('title')->all();
+
+        $this->post("/admin/urutan/galeri/{$items[4]->id}/to", ['position' => 1])->assertRedirect('/admin/galeri');
+        $this->assertSame(['F4', 'F0', 'F1', 'F2', 'F3'], $titles());
+
+        $this->post("/admin/urutan/galeri/{$items[4]->id}/to", ['position' => 99]);
+        $this->assertSame(['F0', 'F1', 'F2', 'F3', 'F4'], $titles());
+
+        $this->post("/admin/urutan/galeri/{$items[0]->id}/to", ['position' => 3]);
+        $this->assertSame(['F1', 'F2', 'F0', 'F3', 'F4'], $titles());
     }
 
     public function test_landing_page_hides_empty_categories_and_offers_show_all_for_many_photos(): void

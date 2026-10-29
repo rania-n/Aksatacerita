@@ -177,6 +177,7 @@
     const original = q('image').getAttribute('src') || '';
     let blob = null;
     const update = () => {
+      if (form.classList.contains('is-multi')) return;
       setText(q('name'), f.name.value.trim() || 'Nama frame');
       const size = f.size.value.trim().toUpperCase();
       setText(q('size'), size);
@@ -207,6 +208,7 @@
     const original = q('image').getAttribute('src') || '';
     let blob = null;
     const update = () => {
+      if (form.classList.contains('is-multi')) return;
       setText(q('title'), f.title.value.trim() || 'Judul foto');
       setText(q('category'), f.category.value || '');
       const input = f['image[]'] || f.image;
@@ -221,6 +223,68 @@
     form.addEventListener('input', update);
     form.addEventListener('change', update);
     update();
+  }
+
+
+  // ---------- Unggah banyak file: nama/judul per file + pratinjau mengikuti file yang sedang diisi ----------
+  const multi = $('[data-multi]');
+  if (multi) {
+    const form = multi.closest('form');
+    const fileInput = form.elements['image[]'];
+    const mainField = form.elements.title || form.elements.name;
+    const preview = $('[data-preview]', form.parentNode) || $('[data-preview]');
+    const nameKey = form.elements.title ? 'title' : 'name';
+    const maxLength = mainField.maxLength > 0 ? mainField.maxLength : 80;
+    const prettify = (file) => file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim()
+      .replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, maxLength);
+    let urls = [];
+
+    const show = (row) => {
+      if (!preview || !row) return;
+      const img = $('[data-p="image"]', preview);
+      const ph = $('[data-p="placeholder"]', preview);
+      const label = $(`[data-p="${nameKey}"]`, preview);
+      if (img) { img.src = row.dataset.url; img.hidden = false; }
+      if (ph) ph.hidden = true;
+      if (label) label.textContent = $('input', row).value.trim() || (nameKey === 'title' ? 'Judul foto' : 'Nama frame');
+    };
+
+    if (fileInput) fileInput.addEventListener('change', () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+      urls = [];
+      multi.replaceChildren();
+      const files = Array.from(fileInput.files);
+      const many = files.length > 1;
+      multi.hidden = !many;
+      form.classList.toggle('is-multi', many);
+      mainField.disabled = many;
+      mainField.closest('label').hidden = many;
+      if (!many) { fire(mainField); return; }
+
+      const head = document.createElement('p');
+      head.className = 'hint';
+      head.textContent = `${files.length} file dipilih. Isi ${nameKey === 'title' ? 'judul' : 'nama'} tiap file (sudah diisi dari nama berkas, boleh diubah). Klik baris untuk melihat pratinjaunya.`;
+      multi.append(head);
+      files.forEach((file, i) => {
+        const url = URL.createObjectURL(file);
+        urls.push(url);
+        const row = document.createElement('div');
+        row.className = 'multi-row';
+        row.dataset.url = url;
+        const img = document.createElement('img');
+        img.src = url; img.alt = '';
+        const input = document.createElement('input');
+        input.name = 'names[]'; input.required = true; input.maxLength = maxLength;
+        input.value = prettify(file) || `File ${i + 1}`;
+        input.setAttribute('aria-label', `${nameKey === 'title' ? 'Judul' : 'Nama'} file ${i + 1}: ${file.name}`);
+        input.addEventListener('focus', () => show(row));
+        input.addEventListener('input', () => show(row));
+        row.addEventListener('click', () => show(row));
+        row.append(img, input);
+        multi.append(row);
+      });
+      show($('.multi-row', multi));
+    });
   }
 
   // ---------- Pratinjau pengaturan ----------

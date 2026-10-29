@@ -38,7 +38,7 @@ class FrameController extends Controller
 
         foreach ($files as $i => $file) {
             $frame = Frame::create($data + [
-                'name' => UploadName::for($request->input('name'), $file, $i, count($files), 60),
+                'name' => trim(count($files) > 1 ? $request->input("names.{$i}") : $request->input('name')),
                 'image_path' => ImageUploader::store($file, 'frames', 1200),
                 'sort_order' => $nextOrder + $i,
                 'color' => Palette::DEFAULT,
@@ -92,14 +92,18 @@ class FrameController extends Controller
         if ($creating) {
             UploadName::normalize($request);
         }
+        $count = count(Arr::wrap($request->file('image')));
+        $many = $creating && $count > 1;
         $v = $request->validate([
-            'name' => [$creating ? 'nullable' : 'required', 'string', 'max:60'],
+            'name' => [$many ? 'nullable' : 'required', 'string', 'max:60'],
+            'names' => $many ? ['required', 'array', 'size:'.$count] : ['nullable', 'array'],
+            'names.*' => ['required', 'string', 'max:60'],
             'label' => ['nullable', 'string', 'max:20'],
             'type' => ['nullable', 'string', 'max:30'],
             'size' => ['nullable', 'string', 'max:12'],
             'image' => $creating ? ['required', 'array', 'max:20'] : ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
             'image.*' => $creating ? ['image', 'mimes:jpg,jpeg,png,webp', 'max:10240'] : [],
-        ]);
+        ], ['names.*.required' => 'Nama setiap frame wajib diisi.', 'names.size' => 'Jumlah nama harus sama dengan jumlah file.']);
 
         Setting::addToList('options_frame_label', isset($v['label']) ? strtoupper($v['label']) : null);
         Setting::addToList('options_frame_type', $v['type'] ?? null);

@@ -45,7 +45,7 @@ class GalleryController extends Controller
 
         foreach ($files as $i => $file) {
             $item = GalleryItem::create([
-                'title' => UploadName::for($v['title'] ?? null, $file, $i, count($files), 80),
+                'title' => trim(count($files) > 1 ? $v['names'][$i] : $v['title']),
                 'category' => $v['category'],
                 'image_path' => ImageUploader::store($file, 'gallery', 1600),
                 'is_active' => $request->boolean('is_active'),
@@ -87,13 +87,17 @@ class GalleryController extends Controller
         if ($creating) {
             UploadName::normalize($request);
         }
+        $count = count(Arr::wrap($request->file('image')));
+        $many = $creating && $count > 1;
 
         $v = $request->validate([
-            'title' => [$creating ? 'nullable' : 'required', 'string', 'max:80'],
+            'title' => [$many ? 'nullable' : 'required', 'string', 'max:80'],
+            'names' => $many ? ['required', 'array', 'size:'.$count] : ['nullable', 'array'],
+            'names.*' => ['required', 'string', 'max:80'],
             'category' => ['required', 'string', 'max:30'],
             'image' => $creating ? ['required', 'array', 'max:20'] : ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:6144'],
             'image.*' => $creating ? ['image', 'mimes:jpg,jpeg,png,webp', 'max:6144'] : [],
-        ]);
+        ], ['names.*.required' => 'Judul setiap foto wajib diisi.', 'names.size' => 'Jumlah judul harus sama dengan jumlah file.']);
 
         Setting::addToList('gallery_categories', $v['category']);
 
