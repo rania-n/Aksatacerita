@@ -288,72 +288,45 @@
   }
 
 
-  // ---------- Urutan: tahan pegangan ⠿ lalu geser; tersimpan otomatis ----------
-  const ITEM = '.admin-item, .gallery-admin > article';
-  let drag = null;
-  const itemsOf = (list) => Array.from(list.children).filter((el) => el.matches(ITEM));
-  const edges = (list) => {
-    const items = itemsOf(list);
-    items.forEach((el, i) => {
-      const up = $('form[action$="/up"] button', el);
-      const down = $('form[action$="/down"] button', el);
-      if (up) up.disabled = i === 0;
-      if (down) down.disabled = i === items.length - 1;
-    });
-    return items;
-  };
-  const restore = (d) => d.list.insertBefore(d.item, d.next);
 
-  document.addEventListener('dragstart', (e) => {
-    const handle = e.target.closest && e.target.closest('.drag-handle');
-    const item = handle && handle.closest(ITEM);
-    if (!item) return;
-    drag = { item, handle, list: item.parentElement, next: item.nextSibling, start: itemsOf(item.parentElement).indexOf(item) };
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', '');
-    e.dataTransfer.setDragImage(item, 24, 24);
-    requestAnimationFrame(() => item.classList.add('dragging'));
-  });
-
-  document.addEventListener('dragover', (e) => {
-    if (!drag || !drag.list.contains(e.target)) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    const over = e.target.closest(ITEM);
-    if (!over || over === drag.item || over.parentElement !== drag.list) return;
-    const r = over.getBoundingClientRect();
-    const d = drag.item.getBoundingClientRect();
-    const sameRow = Math.abs(r.top - d.top) < 8;
-    const after = sameRow ? e.clientX > r.left + r.width / 2 : e.clientY > r.top + r.height / 2;
-    const ref = after ? over.nextSibling : over;
-    if (ref !== drag.item && ref !== drag.item.nextSibling) drag.list.insertBefore(drag.item, ref);
-  });
-
-  document.addEventListener('drop', (e) => { if (drag && drag.list.contains(e.target)) e.preventDefault(); });
-
-  document.addEventListener('dragend', async (e) => {
-    if (!drag) return;
-    const d = drag;
-    d.item.classList.remove('dragging');
-    const index = itemsOf(d.list).indexOf(d.item);
-    const position = index + 1;
-    if (e.dataTransfer.dropEffect === 'none') { restore(d); drag = null; edges(d.list); return; }
-    if (index === d.start) { drag = null; return; }
-    edges(d.list);
-    try {
-      const res = await fetch(d.handle.dataset.sortUrl, {
-        method: 'POST',
-        headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `position=${position}`,
-      });
-      if (!res.ok) throw new Error(String(res.status));
-    } catch (err) {
-      restore(d);
-      edges(d.list);
-      alert('Urutan gagal disimpan. Coba lagi, atau pakai tombol ▲ ▼.');
+  // ---------- Daftar admin: kembali tepat ke item setelah geser urutan, dan aksi massal ----------
+  if (/^#item-/.test(location.hash)) {
+    const target = document.getElementById(location.hash.slice(1));
+    const goToItem = () => {
+      target.scrollIntoView({ block: 'center', behavior: 'instant' });
+      target.classList.add('flash');
+      setTimeout(() => target.classList.remove('flash'), 1800);
+      history.replaceState(null, '', location.pathname + location.search);
+    };
+    if (target) {
+      if (document.readyState === 'complete') goToItem(); else window.addEventListener('load', goToItem);
     }
-    drag = null;
-  });
+  }
+
+  const bulk = $('[data-bulk]');
+  if (bulk) {
+    const checks = () => $$('.bulk-check');
+    const all = $('.bulk-all', bulk);
+    const count = $('.bulk-count', bulk);
+    const buttons = $$('button', bulk);
+    const refresh = () => {
+      const list = checks();
+      const n = list.filter((c) => c.checked).length;
+      count.textContent = n ? `${n} dipilih` : 'Pilih item untuk aksi massal';
+      buttons.forEach((b) => { b.disabled = n === 0; });
+      all.checked = n > 0 && n === list.length;
+      all.indeterminate = n > 0 && n < list.length;
+      bulk.classList.toggle('has-selection', n > 0);
+      list.forEach((c) => { const row = c.closest('.admin-item, .gallery-admin > article'); if (row) row.classList.toggle('selected', c.checked); });
+    };
+    all.addEventListener('change', () => { checks().forEach((c) => { c.checked = all.checked; }); refresh(); });
+    document.addEventListener('change', (e) => { if (e.target.matches && e.target.matches('.bulk-check')) refresh(); });
+    bulk.addEventListener('submit', (e) => {
+      const n = checks().filter((c) => c.checked).length;
+      if (e.submitter && e.submitter.value === 'delete' && !confirm(`Hapus ${n} item yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) e.preventDefault();
+    });
+    refresh();
+  }
 
   // ---------- Pratinjau pengaturan ----------
   const set = $('[data-preview="settings"]');

@@ -175,22 +175,43 @@ class FrameAssetSeederTest extends TestCase
         $this->assertSame(0, GalleryItem::count() + Frame::count());
     }
 
-    public function test_reorder_can_jump_straight_to_a_position(): void
+    public function test_moving_an_item_returns_to_that_item_in_the_list(): void
     {
         $this->actingAs(User::factory()->create());
-        $items = collect(range(0, 4))->map(fn ($i) => GalleryItem::create(['title' => "F{$i}", 'category' => 'Event', 'image_path' => 'https://x.test/a.jpg', 'sort_order' => $i]));
-        $titles = fn () => GalleryItem::orderBy('sort_order')->pluck('title')->all();
+        $items = collect(range(0, 2))->map(fn ($i) => GalleryItem::create(['title' => "F{$i}", 'category' => 'Event', 'image_path' => 'https://x.test/a.jpg', 'sort_order' => $i]));
 
-        $this->post("/admin/urutan/galeri/{$items[4]->id}/to", ['position' => 1])->assertRedirect('/admin/galeri');
-        $this->assertSame(['F4', 'F0', 'F1', 'F2', 'F3'], $titles());
+        $this->post("/admin/urutan/galeri/{$items[2]->id}/up")->assertRedirect(route('admin.gallery.index').'#item-galeri-'.$items[2]->id);
 
-        $this->post("/admin/urutan/galeri/{$items[4]->id}/to", ['position' => 99]);
-        $this->assertSame(['F0', 'F1', 'F2', 'F3', 'F4'], $titles());
+        $this->assertSame(['F0', 'F2', 'F1'], GalleryItem::orderBy('sort_order')->pluck('title')->all());
+        $this->get('/admin/galeri')->assertSee('id="item-galeri-'.$items[2]->id.'"', false)->assertSee('data-bulk', false);
+    }
 
-        $this->postJson("/admin/urutan/galeri/{$items[0]->id}/to", ['position' => 3])->assertNoContent();
-        $this->assertSame(['F1', 'F2', 'F0', 'F3', 'F4'], $titles());
+    public function test_bulk_actions_hide_show_and_delete_many_items_at_once(): void
+    {
+        Storage::fake('public');
+        $this->actingAs(User::factory()->create());
+        $frames = collect(['A', 'B', 'C'])->map(function ($name) {
+            Storage::disk('public')->put("frames/{$name}.png", 'x');
 
-        $this->get('/admin/galeri')->assertSee('drag-handle', false)->assertSee('data-sort-url', false);
+            return Frame::create(['name' => $name, 'image_path' => "frames/{$name}.png", 'is_active' => true]);
+        });
+        $pick = [$frames[0]->id, $frames[1]->id];
+
+        $this->post('/admin/massal/frame', ['action' => 'hide', 'ids' => $pick])->assertRedirect(route('admin.frames.index'));
+        $this->assertSame(['C'], Frame::where('is_active', true)->pluck('name')->all());
+
+        $this->post('/admin/massal/frame', ['action' => 'show', 'ids' => $pick]);
+        $this->assertSame(3, Frame::where('is_active', true)->count());
+
+        $this->post('/admin/massal/frame', ['action' => 'delete', 'ids' => $pick]);
+        $this->assertSame(['C'], Frame::pluck('name')->all());
+        Storage::disk('public')->assertMissing('frames/A.png');
+        Storage::disk('public')->assertExists('frames/C.png');
+
+        $this->post('/admin/massal/frame', ['action' => 'delete'])->assertSessionHas('ok', 'Pilih minimal satu item dulu.');
+        $this->assertSame(1, Frame::count());
+        $this->post('/admin/massal/frame', ['action' => 'rusak', 'ids' => [1]])->assertNotFound();
+        $this->post('/admin/massal/tidak-ada', ['action' => 'hide', 'ids' => [1]])->assertNotFound();
     }
 
     public function test_landing_page_hides_empty_categories_and_offers_show_all_for_many_photos(): void

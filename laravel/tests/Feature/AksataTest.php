@@ -381,13 +381,13 @@ class AksataTest extends TestCase
         $a = Package::create(['name' => 'A', 'price' => '1', 'color' => 'blue', 'sort_order' => 0]);
         $b = Package::create(['name' => 'B', 'price' => '1', 'color' => 'blue', 'sort_order' => 0]); // urutan sama
 
-        $this->post("/admin/urutan/paket/{$b->id}/up")->assertRedirect('/admin/paket');
+        $this->post("/admin/urutan/paket/{$b->id}/up")->assertRedirectContains('/admin/paket#item-paket-');
         $this->assertSame(['B', 'A'], Package::orderBy('sort_order')->orderBy('id')->pluck('name')->all());
 
-        $this->post("/admin/urutan/paket/{$b->id}/up")->assertRedirect('/admin/paket'); // sudah paling atas
+        $this->post("/admin/urutan/paket/{$b->id}/up")->assertRedirectContains('/admin/paket#item-paket-'); // sudah paling atas
         $this->assertSame(['B', 'A'], Package::orderBy('sort_order')->orderBy('id')->pluck('name')->all());
 
-        $this->post("/admin/urutan/paket/{$b->id}/down")->assertRedirect('/admin/paket');
+        $this->post("/admin/urutan/paket/{$b->id}/down")->assertRedirectContains('/admin/paket#item-paket-');
         $this->assertSame(['A', 'B'], Package::orderBy('sort_order')->orderBy('id')->pluck('name')->all());
 
         $this->post('/admin/urutan/paket/999/up')->assertNotFound();

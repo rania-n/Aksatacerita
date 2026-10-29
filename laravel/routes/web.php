@@ -39,6 +39,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::delete('/pilihan/{list}', [Admin\OptionController::class, 'destroy'])->name('options.destroy');
 
+    Route::post('/massal/{type}', Admin\BulkController::class)->name('bulk');
     Route::post('/urutan/{type}/{id}/{direction}', Admin\ReorderController::class)->whereNumber('id')->name('reorder');
 
     Route::get('/akun', [Admin\AccountController::class, 'edit'])->name('account.edit');

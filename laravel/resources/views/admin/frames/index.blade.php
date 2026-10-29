@@ -4,9 +4,10 @@
 @section('content')
 <section class="panel">
     <div class="panel-head"><div><span>FRAME OF THE MONTH</span><h2>{{ $items->count() }} frame</h2></div><a class="btn btn-primary btn-sm" href="{{ route('admin.frames.create') }}"><x-icon name="plus" :size="16" /> Tambah frame</a></div>
+    @if ($items->isNotEmpty())<x-bulk-bar type="frame" />@endif
     <div class="admin-list">
         @forelse ($items as $item)
-            <div class="admin-item {{ $item->is_active ? '' : 'off' }}">
+            <div id="item-frame-{{ $item->id }}" class="admin-item {{ $item->is_active ? '' : 'off' }}">
                 <div class="admin-thumb" style="background:{{ $item->color_hex }}22;color:{{ $item->color_hex }}">@if ($item->image_url)<img src="{{ $item->image_url }}" alt="">@else<x-icon name="sparkle" />@endif</div>
                 <div><b>{{ $item->name }}{{ $item->is_active ? '' : ' (disembunyikan)' }}</b><small>{{ collect([$item->type, $item->size, $item->label])->filter()->implode(' · ') ?: 'Belum ada jenis/ukuran' }}</small></div>
                 <span></span>
