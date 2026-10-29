@@ -185,5 +185,5 @@ footer { background:#0d0d0d;color:white;padding:65px 0 25px; }.footer-top{displa
 .package-addon b{font:700 12px "Space Grotesk";color:var(--card)}.package-addon span{color:#666;line-height:1.5}
 .frame-size{font:700 10px "Space Grotesk";letter-spacing:1px;border:1px solid currentColor;padding:3px 6px;font-style:normal;color:#555}
 .frame-filters{margin:0 0 35px}
-.frames-more{text-align:center;margin-top:40px}
+.frames-more,.gallery-more{text-align:center;margin-top:40px}
 .frame-wrap[hidden]{display:none!important}

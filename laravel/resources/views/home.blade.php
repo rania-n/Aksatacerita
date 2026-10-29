@@ -15,7 +15,11 @@
         $s['tiktok'] ? 'https://www.tiktok.com/@'.$s['tiktok'] : null,
         $s['facebook'] ?: null,
     ]));
-    $categories = collect($categories)->merge($gallery->pluck('category'))->unique()->values();
+    $usedCategories = $gallery->pluck('category')->map(fn ($c) => mb_strtolower($c));
+    $categories = collect($categories)->merge($gallery->pluck('category'))
+        ->unique(fn ($c) => mb_strtolower($c))
+        ->filter(fn ($c) => $usedCategories->contains(mb_strtolower($c)))
+        ->values();
     $schema = array_filter([
         '@context' => 'https://schema.org',
         '@type' => 'LocalBusiness',
@@ -170,8 +174,9 @@
     @if ($gallery->isNotEmpty())
     <section class="section gallery-section shell" id="galeri">
         <div class="gallery-title"><span class="kicker">03 — TEMAN CERITA</span><h2>Real people.<br><i>Real fun.</i></h2><p>Tag <b>{{ '@'.$s['instagram'] }}</b> supaya ceritamu bisa ikut tampil di sini.</p></div>
-        <div class="filters">@foreach ($categories->prepend('Semua') as $cat)<button data-cat="{{ $cat }}" class="{{ $loop->first ? 'active' : '' }}">{{ $cat }}</button>@endforeach</div>
+        @if ($categories->count() > 1)<div class="filters">@foreach ($categories->prepend('Semua') as $cat)<button data-cat="{{ $cat }}" class="{{ $loop->first ? 'active' : '' }}">{{ $cat }}</button>@endforeach</div>@endif
         <div class="masonry">@foreach ($gallery as $item)<figure data-cat="{{ $item->category }}"><img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy"><figcaption><span>{{ $item->category }}</span><b>{{ $item->title }}</b></figcaption></figure>@endforeach</div>
+        <div class="gallery-more" hidden><button type="button" class="btn btn-dark gallery-toggle-btn">Lihat semua cerita ({{ $gallery->count() }}) <x-icon name="arrow" /></button></div>
     </section>
 
     @endif

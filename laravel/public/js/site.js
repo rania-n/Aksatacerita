@@ -91,7 +91,7 @@
   updateLink();
 
   // Gallery filter & expandable view
-  const filters = $$('.filters button');
+  const filters = $$('.gallery-section .filters button');
   const figures = $$('.masonry figure');
   const galleryMoreBox = $('.gallery-more');
   const galleryToggleBtn = $('.gallery-toggle-btn');
@@ -100,7 +100,7 @@
   let galleryExpanded = false;
 
   const renderGallery = () => {
-    const matching = figures.filter((fig) => currentCat === 'Semua' || fig.dataset.cat === currentCat);
+    const matching = figures.filter((fig) => currentCat === 'Semua' || fig.dataset.cat.toLowerCase() === currentCat.toLowerCase());
     figures.forEach((fig) => { fig.hidden = true; });
     let n = 0;
     matching.forEach((fig, i) => {
