@@ -1,38 +1,47 @@
 {
-  "GALERI/Couple/heart-check.jpg": {
-    "title": "Heart Check"
-  },
-  "GALERI/Couple/hold-me-closer.jpg": {
-    "title": "Hold Me Closer"
-  },
-  "GALERI/Couple/playful-crush.jpg": {
-    "title": "Playful Crush"
-  },
-  "GALERI/Couple/holo-vibes.jpg": {
-    "title": "Holo Vibes"
-  },
-  "GALERI/Bestie/cowboy-besties.jpg": {
-    "title": "Cowboy Besties"
-  },
-  "GALERI/Bestie/pink-squad.jpg": {
-    "title": "Pink Squad"
-  },
-  "GALERI/Bestie/denim-day-out.jpg": {
-    "title": "Denim Day Out"
-  },
-  "GALERI/Bestie/soft-girls-club.jpg": {
-    "title": "Soft Girls Club"
-  },
-  "GALERI/Event/squad-reunion.jpg": {
-    "title": "Squad Reunion"
-  },
-  "GALERI/Event/gang-goals.jpg": {
-    "title": "Gang Goals"
-  },
-  "GALERI/Photostrip/strip-cerita.jpg": {
-    "title": "Strip Cerita"
-  },
-  "GALERI/Photostrip/holo-photostrip.jpg": {
-    "title": "Holo Photostrip"
-  }
+    "DVD PHOTOBOOTH/20260805_162445.jpg": {
+        "name": "DVD 07"
+    },
+    "GALERI/Bestie/cowboy-besties.jpg": {
+        "title": "Cowboy Besties"
+    },
+    "GALERI/Bestie/denim-day-out.jpg": {
+        "title": "Denim Day Out"
+    },
+    "GALERI/Bestie/pink-squad.jpg": {
+        "title": "Pink Squad"
+    },
+    "GALERI/Bestie/pmIu0hFZ1bz4ii2kOnpUVG6Ehvech89V9UdTSRvP.webp": {
+        "title": "Kebun Binatang 💚"
+    },
+    "GALERI/Bestie/soft-girls-club.jpg": {
+        "title": "Soft Girls Club"
+    },
+    "GALERI/Couple/heart-check.jpg": {
+        "title": "Heart Check"
+    },
+    "GALERI/Couple/hold-me-closer.jpg": {
+        "title": "Hold Me Closer"
+    },
+    "GALERI/Couple/holo-vibes.jpg": {
+        "title": "Holo Vibes"
+    },
+    "GALERI/Couple/playful-crush.jpg": {
+        "title": "Playful Crush"
+    },
+    "GALERI/Event/IjrAwr0FZIeLom4fR5Cl7jzdmD6ikYTsoJvA8e6w.webp": {
+        "title": "😱🥶"
+    },
+    "GALERI/Event/gang-goals.jpg": {
+        "title": "Gang Goals"
+    },
+    "GALERI/Event/squad-reunion.jpg": {
+        "title": "Squad Reunion"
+    },
+    "GALERI/Photostrip/holo-photostrip.jpg": {
+        "title": "Holo Photostrip"
+    },
+    "GALERI/Photostrip/strip-cerita.jpg": {
+        "title": "Strip Cerita"
+    }
 }
