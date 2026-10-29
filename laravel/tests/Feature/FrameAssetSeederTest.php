@@ -187,8 +187,10 @@ class FrameAssetSeederTest extends TestCase
         $this->post("/admin/urutan/galeri/{$items[4]->id}/to", ['position' => 99]);
         $this->assertSame(['F0', 'F1', 'F2', 'F3', 'F4'], $titles());
 
-        $this->post("/admin/urutan/galeri/{$items[0]->id}/to", ['position' => 3]);
+        $this->postJson("/admin/urutan/galeri/{$items[0]->id}/to", ['position' => 3])->assertNoContent();
         $this->assertSame(['F1', 'F2', 'F0', 'F3', 'F4'], $titles());
+
+        $this->get('/admin/galeri')->assertSee('drag-handle', false)->assertSee('data-sort-url', false);
     }
 
     public function test_landing_page_hides_empty_categories_and_offers_show_all_for_many_photos(): void

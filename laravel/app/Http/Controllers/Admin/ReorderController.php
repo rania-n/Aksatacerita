@@ -43,6 +43,6 @@ class ReorderController extends Controller
             }
         }
 
-        return redirect()->route($route);
+        return $request->expectsJson() ? response()->noContent() : redirect()->route($route);
     }
 }
