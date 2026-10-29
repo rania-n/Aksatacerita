@@ -4,9 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Frame;
 use App\Models\Setting;
+use App\Support\SeedAssets;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * Mengisi tabel frames dari berkas di database/seeders/assets (ikut ter-commit),
@@ -16,15 +16,15 @@ use Illuminate\Support\Str;
 class FrameAssetSeeder extends Seeder
 {
     /**
-     * Folder aset => [jenis frame, awalan nama].
+     * Jenis frame => awalan nama.
      *
-     * @var array<string, array{0: string, 1: string}>
+     * @var array<string, string>
      */
-    private const FOLDERS = [
-        'FRAME BIASA' => ['Frame Biasa', 'Frame'],
-        'FRAME KORAN' => ['Frame Koran', 'Koran'],
-        'ID CARD PHOTOBOOTH' => ['ID Card', 'ID Card'],
-        'DVD PHOTOBOOTH' => ['DVD Photobooth', 'DVD'],
+    private const PREFIXES = [
+        'Frame Biasa' => 'Frame',
+        'Frame Koran' => 'Koran',
+        'ID Card' => 'ID Card',
+        'DVD Photobooth' => 'DVD',
     ];
 
     public function run(): void
@@ -32,12 +32,13 @@ class FrameAssetSeeder extends Seeder
         $disk = Storage::disk('public');
         $sortOrder = 0;
 
-        foreach (self::FOLDERS as $folder => [$type, $prefix]) {
+        foreach (SeedAssets::FRAME_FOLDERS as $type => $folder) {
+            $prefix = self::PREFIXES[$type];
             $files = glob(database_path("seeders/assets/{$folder}/*.{png,jpg,jpeg,webp}"), GLOB_BRACE) ?: [];
             natcasesort($files);
 
             foreach (array_values($files) as $index => $file) {
-                $imagePath = 'frames/'.Str::slug(pathinfo($file, PATHINFO_FILENAME)).'.'.strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                $imagePath = SeedAssets::storedPath('frames', $file);
 
                 if (! $disk->exists($imagePath)) {
                     $disk->put($imagePath, file_get_contents($file));
