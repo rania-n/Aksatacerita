@@ -221,7 +221,7 @@ class AksataTest extends TestCase
         $this->put('/admin/info', $this->settingsPayload(['latitude' => '95']))->assertSessionHasErrors('latitude');
         $this->put('/admin/info', $this->settingsPayload(['longitude' => null]))->assertSessionHasErrors('longitude');
         $this->put('/admin/info', $this->settingsPayload(['instagram' => 'a b!']))->assertSessionHasErrors('instagram');
-        $this->assertSame('Ruma Pinara', Setting::get('studio_name'));
+        $this->assertSame('Aksata Cerita Photobooth', Setting::get('studio_name'));
     }
 
     public function test_settings_optional_fields_can_be_cleared_and_pin_is_optional(): void

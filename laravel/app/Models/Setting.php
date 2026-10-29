@@ -11,12 +11,12 @@ class Setting extends Model
     /** Nilai bawaan; juga daftar semua kunci pengaturan yang dikenal. */
     public const DEFAULTS = [
         // Studio & lokasi
-        'studio_name' => 'Ruma Pinara',
+        'studio_name' => 'Aksata Cerita Photobooth',
         'city' => 'Tulungagung',
-        'address' => "Jl. I Gusti Ngurah Rai Gg. 8 No. 90,\nJepun, Tulungagung, Jawa Timur",
-        'latitude' => '-8.0695',
-        'longitude' => '111.9082',
-        'maps_url' => 'https://www.google.com/maps/search/?api=1&query=Ruma+Pinara+Tulungagung',
+        'address' => "Jl. I Gusti Ngurah Rai Gg. 7 No.73,\nJepun, Kec. Tulungagung, Kabupaten Tulungagung, Jawa Timur 66218",
+        'latitude' => '-8.0412672',
+        'longitude' => '111.9158272',
+        'maps_url' => 'https://maps.app.goo.gl/8VrbRe4nmPsAG6Jf8',
         'open_days' => 'Setiap Hari',
         'open_hours' => '10.00 — 22.00 WIB',
         'last_session' => 'Last session 21.30',

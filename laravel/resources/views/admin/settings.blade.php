@@ -23,7 +23,7 @@
         <div id="map-picker" data-icons="{{ asset('vendor/leaflet/images') }}/" data-lat="{{ old('latitude', $s['latitude']) }}" data-lng="{{ old('longitude', $s['longitude']) }}"></div>
         <p class="map-status" id="map-status">Klik peta atau geser pin untuk menandai lokasi studio. Koordinat terisi otomatis.</p>
         <div class="row">
-            <label>Latitude<input name="latitude" id="f-latitude" value="{{ old('latitude', $s['latitude']) }}" inputmode="decimal" placeholder="-8.0654">@error('latitude')<span class="error">{{ $message }}</span>@enderror</label>
+            <label>Latitude<input name="latitude" id="f-latitude" value="{{ old('latitude', $s['latitude']) }}" inputmode="decimal" placeholder="-8.0412672">@error('latitude')<span class="error">{{ $message }}</span>@enderror</label>
             <label>Longitude<input name="longitude" id="f-longitude" value="{{ old('longitude', $s['longitude']) }}" inputmode="decimal" placeholder="111.9025">@error('longitude')<span class="error">{{ $message }}</span>@enderror</label>
         </div>
         <label>Link Google Maps (opsional)<input name="maps_url" value="{{ old('maps_url', $s['maps_url']) }}" maxlength="500" placeholder="https://maps.app.goo.gl/..."><span class="hint">Dipakai untuk tombol "Buka di Google Maps". Kosongkan bila ingin otomatis dibuat dari pin di atas.</span>@error('maps_url')<span class="error">{{ $message }}</span>@enderror</label>
