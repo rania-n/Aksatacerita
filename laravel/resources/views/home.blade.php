@@ -70,7 +70,7 @@
             @if ($s['proof_show'] === '1' && ($s['proof_rating'] !== '' || $s['proof_text'] !== ''))
             <div class="hero-proof">
                 @if ($photos->isNotEmpty())<div class="avatar-stack">@foreach (range(0, min(2, $photos->count() - 1)) as $i)<img src="{{ $p($i) }}" alt="">@endforeach</div>@endif
-                <div><b>{{ $s['proof_rating'] }}</b><span>{{ $s['proof_text'] }}</span></div>
+                <div class="proof-labels"><b class="proof-rate">{{ $s['proof_rating'] }}</b><span class="proof-sub">{{ $s['proof_text'] }}</span></div>
             </div>
             @endif
         </div>
@@ -172,6 +172,7 @@
         <div class="gallery-title"><span class="kicker">03 — TEMAN CERITA</span><h2>Real people.<br><i>Real fun.</i></h2><p>Tag <b>{{ '@'.$s['instagram'] }}</b> supaya ceritamu bisa ikut tampil di sini.</p></div>
         <div class="filters">@foreach ($categories->prepend('Semua') as $cat)<button data-cat="{{ $cat }}" class="{{ $loop->first ? 'active' : '' }}">{{ $cat }}</button>@endforeach</div>
         <div class="masonry">@foreach ($gallery as $item)<figure data-cat="{{ $item->category }}"><img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy"><figcaption><span>{{ $item->category }}</span><b>{{ $item->title }}</b></figcaption></figure>@endforeach</div>
+        <div class="gallery-more" hidden><button type="button" class="btn btn-dark gallery-toggle-btn">Lihat semua cerita ({{ $gallery->count() }}) <x-icon name="arrow" /></button></div>
     </section>
 
     @endif

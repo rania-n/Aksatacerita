@@ -6,7 +6,7 @@
   const lng = document.getElementById('f-longitude');
   const status = document.getElementById('map-status');
   const search = document.getElementById('map-search');
-  const DEFAULT = [-8.0654, 111.9025];
+  const DEFAULT = [-8.0695, 111.9082];
 
   L.Icon.Default.imagePath = box.dataset.icons || '/vendor/leaflet/images/';
 

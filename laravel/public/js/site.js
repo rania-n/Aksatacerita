@@ -90,40 +90,93 @@
   dateInput.addEventListener('change', pickDate);
   updateLink();
 
-  // Gallery filter
+  // Gallery filter & expandable view
   const filters = $$('.filters button');
   const figures = $$('.masonry figure');
-  const applyFilter = (cat) => {
-    filters.forEach((f) => f.classList.toggle('active', f.dataset.cat === cat));
-    let n = 0;
-    figures.forEach((fig) => {
-      const show = cat === 'Semua' || fig.dataset.cat === cat;
-      fig.hidden = !show;
-      fig.classList.toggle('tall', show && n++ % 3 === 1);
-    });
-  };
-  filters.forEach((f) => f.addEventListener('click', () => applyFilter(f.dataset.cat)));
-  if (filters.length) applyFilter('Semua');
+  const galleryMoreBox = $('.gallery-more');
+  const galleryToggleBtn = $('.gallery-toggle-btn');
+  const FIRST_GALLERY = 6;
+  let currentCat = 'Semua';
+  let galleryExpanded = false;
 
-  // Katalog frame: saring per jenis, default "Semua" langsung tampil lengkap
+  const renderGallery = () => {
+    const matching = figures.filter((fig) => currentCat === 'Semua' || fig.dataset.cat === currentCat);
+    figures.forEach((fig) => { fig.hidden = true; });
+    let n = 0;
+    matching.forEach((fig, i) => {
+      const show = galleryExpanded || i < FIRST_GALLERY;
+      fig.hidden = !show;
+      if (show) {
+        fig.classList.toggle('tall', n++ % 3 === 1);
+      }
+    });
+
+    if (galleryMoreBox && galleryToggleBtn) {
+      if (matching.length > FIRST_GALLERY) {
+        galleryMoreBox.hidden = false;
+        galleryToggleBtn.innerHTML = galleryExpanded
+          ? 'Tampilkan lebih sedikit ↑'
+          : `Lihat semua cerita (${matching.length}) <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-left:4px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+      } else {
+        galleryMoreBox.hidden = true;
+      }
+    }
+  };
+
+  filters.forEach((f) => f.addEventListener('click', () => {
+    currentCat = f.dataset.cat;
+    filters.forEach((x) => x.classList.toggle('active', x === f));
+    galleryExpanded = false;
+    renderGallery();
+  }));
+  if (galleryToggleBtn) {
+    galleryToggleBtn.addEventListener('click', () => {
+      galleryExpanded = !galleryExpanded;
+      renderGallery();
+    });
+  }
+  if (figures.length) renderGallery();
+
+  // Katalog frame: batasi preview default (4 frame), tombol untuk tampilkan semua
   const frameCards = $$('.frame-wrap');
   const frameFilters = $$('.frame-filters button');
   const moreBox = $('.frames-more');
-  const FIRST = 8;
+  const moreBtn = moreBox ? $('button', moreBox) : null;
+  const FIRST_FRAMES = 4;
   let frameType = 'Semua';
-  let expanded = true;
+  let frameExpanded = false;
+
   const renderFrames = () => {
     const matching = frameCards.filter((c) => frameType === 'Semua' || c.dataset.type === frameType);
     frameCards.forEach((c) => { c.hidden = true; });
-    matching.forEach((c, i) => { c.hidden = !(expanded || i < FIRST); });
-    if (moreBox) moreBox.hidden = expanded || matching.length <= FIRST;
+    matching.forEach((c, i) => {
+      c.hidden = !(frameExpanded || i < FIRST_FRAMES);
+    });
+
+    if (moreBox && moreBtn) {
+      if (matching.length > FIRST_FRAMES) {
+        moreBox.hidden = false;
+        moreBtn.innerHTML = frameExpanded
+          ? 'Tampilkan lebih sedikit ↑'
+          : `Lihat semua frame (${matching.length}) <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-left:4px"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
+      } else {
+        moreBox.hidden = true;
+      }
+    }
   };
+
   frameFilters.forEach((b) => b.addEventListener('click', () => {
     frameType = b.dataset.type;
     frameFilters.forEach((x) => x.classList.toggle('active', x === b));
+    frameExpanded = false;
     renderFrames();
   }));
-  if (moreBox) $('button', moreBox).addEventListener('click', () => { expanded = true; renderFrames(); });
+  if (moreBtn) {
+    moreBtn.addEventListener('click', () => {
+      frameExpanded = !frameExpanded;
+      renderFrames();
+    });
+  }
   if (frameCards.length) renderFrames();
 
   // Photobooth playground
