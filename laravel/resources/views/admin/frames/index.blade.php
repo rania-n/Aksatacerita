@@ -3,8 +3,7 @@
 @section('desc', 'Frame yang tersedia di studio. Tampil di bagian "Frame of the Month" pada website; pengunjung bisa langsung bertanya lewat WhatsApp.')
 @section('content')
 <section class="panel">
-    <div class="panel-head"><div><span>FRAME OF THE MONTH</span><h2>{{ $items->count() }} frame</h2></div><a class="btn btn-primary btn-sm" href="{{ route('admin.frames.create') }}"><x-icon name="plus" :size="16" /> Tambah frame</a></div>
-    @if ($items->isNotEmpty())<x-bulk-bar type="frame" />@endif
+    <div class="panel-head"><div><span>FRAME OF THE MONTH</span><h2>{{ $items->count() }} frame</h2></div>@if ($items->isNotEmpty())<x-bulk-bar type="frame" />@endif<a class="btn btn-primary btn-sm" href="{{ route('admin.frames.create') }}"><x-icon name="plus" :size="16" /> Tambah frame</a></div>
     <div class="admin-list">
         @forelse ($items as $item)
             <div id="item-frame-{{ $item->id }}" class="admin-item {{ $item->is_active ? '' : 'off' }}">

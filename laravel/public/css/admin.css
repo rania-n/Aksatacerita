@@ -217,3 +217,35 @@
 .bulk-check,.bulk-all{width:18px;height:18px;margin:0 6px;accent-color:var(--blue);cursor:pointer}.bulk-all{margin:0}
 .admin-item.selected,.gallery-admin article.selected{background:#f3f5ff;outline:2px solid var(--blue);outline-offset:-2px}
 .flash{animation:itemFlash 1.8s ease-out}@keyframes itemFlash{0%,35%{background:#fff3b0}100%{background:transparent}}
+
+/* Urutan: pegangan geser + tampilan saat item digeser */
+.reorder{flex-direction:row;align-items:center;gap:2px}.reorder .arrows{display:flex;flex-direction:column}
+.drag-handle{width:28px;height:34px;display:grid;place-items:center;color:#999;font-size:18px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}.drag-handle:hover{color:var(--blue)}
+.admin-item,.gallery-admin>article{-webkit-touch-callout:none}
+body.is-sorting{user-select:none;-webkit-user-select:none;cursor:grabbing;overscroll-behavior:contain}
+.admin-item.dragging,.gallery-admin>article.dragging{background:#eef1ff;outline:2px solid var(--blue);box-shadow:0 8px 24px #0002;position:relative;z-index:5}
+.bulk-check{flex:none}
+
+/* Mode pilih: kotak centang & aksi massal baru muncul setelah tombol "Pilih" ditekan */
+.bulk-bar:not(.selecting) .bulk-all-label,.bulk-bar:not(.selecting) .bulk-count,.bulk-bar:not(.selecting) .bulk-actions{display:none}
+.bulk-bar:not(.selecting){background:none;border:0;padding:0;justify-content:flex-end}
+.bulk-check{display:none}
+body.selecting .bulk-check{display:inline-block}
+body.selecting .admin-item .row-actions .act.danger,body.selecting .gallery-admin .row-actions .act.danger{display:none}
+
+/* Pegangan geser di kiri, di samping foto */
+.admin-item,.gallery-admin>article{position:relative}
+.admin-item{padding-left:30px}
+.admin-item .drag-handle{position:absolute;left:0;top:50%;transform:translateY(-50%);width:26px}
+.gallery-admin .drag-handle{position:absolute;left:6px;top:6px;width:28px;height:28px;background:#fffd;border-radius:4px;z-index:2;box-shadow:0 1px 4px #0003}
+@media (max-width:800px){.admin-item{padding-left:28px}}
+
+/* Tombol Pilih satu baris dengan judul & tombol Tambah */
+.panel-head{flex-wrap:wrap;gap:12px}.panel-head>div:first-child{margin-right:auto}
+.panel-head .bulk-bar{position:static;margin:0}
+.panel-head .bulk-bar:not(.selecting) .bulk-toggle{padding:9px 16px}
+.panel-head .bulk-bar.selecting{order:3;flex-basis:100%;margin-top:6px;padding:10px 12px}
+.panel-head .bulk-toggle,.panel-head .btn-sm{min-height:42px;padding:10px 18px;font:700 12px "Space Grotesk";display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.panel-head .bulk-toggle{background:#111;color:#fff;border:0}
+.panel-head .bulk-toggle{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+.panel-head .bulk-toggle:hover{background:#eef1ff}

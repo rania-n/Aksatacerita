@@ -5,12 +5,17 @@ namespace Tests\Feature;
 use App\Models\Frame;
 use App\Models\GalleryItem;
 use App\Models\InstagramPost;
+use App\Models\Media;
 use App\Models\Package;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\Money;
+use App\Support\Palette;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -118,17 +123,17 @@ class AksataTest extends TestCase
 
     public function test_money_and_color_helpers(): void
     {
-        $this->assertSame('35K', \App\Support\Money::format(35000, 'k'));
-        $this->assertSame('35.000', \App\Support\Money::format(35000, 'rp'));
-        $this->assertSame('1.500', \App\Support\Money::format(1500, 'k'));
-        $this->assertSame('500', \App\Support\Money::format(500, 'k'));
-        $this->assertSame('0', \App\Support\Money::format(0, 'k'));
+        $this->assertSame('35K', Money::format(35000, 'k'));
+        $this->assertSame('35.000', Money::format(35000, 'rp'));
+        $this->assertSame('1.500', Money::format(1500, 'k'));
+        $this->assertSame('500', Money::format(500, 'k'));
+        $this->assertSame('0', Money::format(0, 'k'));
 
-        $this->assertSame('#0022ff', \App\Support\Palette::normalize('blue'));
-        $this->assertSame('#abcdef', \App\Support\Palette::normalize('#ABCDEF'));
-        $this->assertSame('#0022ff', \App\Support\Palette::normalize('javascript:alert(1)'));
-        $this->assertSame('#ffffff', \App\Support\Palette::textOn('#0022ff'));
-        $this->assertSame('#111111', \App\Support\Palette::textOn('#b7e433'));
+        $this->assertSame('#0022ff', Palette::normalize('blue'));
+        $this->assertSame('#abcdef', Palette::normalize('#ABCDEF'));
+        $this->assertSame('#0022ff', Palette::normalize('javascript:alert(1)'));
+        $this->assertSame('#ffffff', Palette::textOn('#0022ff'));
+        $this->assertSame('#111111', Palette::textOn('#b7e433'));
     }
 
     public function test_custom_colors_become_swatches_and_render_publicly(): void
@@ -137,7 +142,7 @@ class AksataTest extends TestCase
         $this->post('/admin/paket', ['name' => 'Ungu Kustom', 'price' => '20000', 'price_style' => 'rp', 'duration_unit' => 'menit', 'color' => '#12AB34', 'is_active' => 1])->assertRedirect('/admin/paket');
 
         $this->assertSame('#12ab34', Package::firstOrFail()->color);
-        $this->assertContains('#12ab34', \App\Support\Palette::swatches());
+        $this->assertContains('#12ab34', Palette::swatches());
         $this->get('/admin/paket/buat')->assertOk()->assertSee('data-value="#12ab34"', false);
         $this->get('/')->assertSee('--card: #12ab34', false)->assertSee('20.000');
     }
@@ -305,7 +310,7 @@ class AksataTest extends TestCase
 
     public function test_password_reset_by_email(): void
     {
-        \Illuminate\Support\Facades\Notification::fake();
+        Notification::fake();
         $user = User::factory()->create(['email' => 'boss@aksata.test', 'password' => 'lamaaaaa1']);
 
         $this->get('/login')->assertSee('Lupa password?');
@@ -314,11 +319,11 @@ class AksataTest extends TestCase
         // jawaban sama untuk email terdaftar atau tidak, supaya email admin tidak bisa ditebak
         $same = 'Jika email terdaftar';
         $this->post('/lupa-password', ['email' => 'tidak@ada.test'])->assertSessionHas('status', fn ($m) => str_contains($m, $same));
-        \Illuminate\Support\Facades\Notification::assertNothingSent();
+        Notification::assertNothingSent();
         $this->post('/lupa-password', ['email' => $user->email])->assertSessionHas('status', fn ($m) => str_contains($m, $same));
 
         $token = null;
-        \Illuminate\Support\Facades\Notification::assertSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class, function ($n) use (&$token) {
+        Notification::assertSentTo($user, ResetPassword::class, function ($n) use (&$token) {
             $token = $n->token;
 
             return true;
@@ -335,18 +340,18 @@ class AksataTest extends TestCase
 
     public function test_admin_can_send_password_link_to_own_email(): void
     {
-        \Illuminate\Support\Facades\Notification::fake();
+        Notification::fake();
         $user = $this->admin();
 
         $this->actingAs($user)->get('/admin/akun')->assertOk()->assertSee('Kirim link ke email saya');
         $this->post('/admin/akun/link-password')->assertSessionHas('ok');
-        \Illuminate\Support\Facades\Notification::assertSentTo($user, \Illuminate\Auth\Notifications\ResetPassword::class);
+        Notification::assertSentTo($user, ResetPassword::class);
     }
 
     public function test_password_reset_email_is_in_indonesian(): void
     {
         $user = User::factory()->create();
-        $mail = (new \Illuminate\Auth\Notifications\ResetPassword('tok'))->toMail($user);
+        $mail = (new ResetPassword('tok'))->toMail($user);
         $this->assertStringContainsString('Link Ganti Password', $mail->subject);
         $this->assertStringContainsString('Anda menerima email ini', $mail->introLines[0]);
     }
@@ -393,6 +398,18 @@ class AksataTest extends TestCase
         $this->post('/admin/urutan/paket/999/up')->assertNotFound();
         $this->post("/admin/urutan/hacker/{$a->id}/up")->assertNotFound();
         $this->post("/admin/urutan/paket/{$a->id}/sideways")->assertNotFound();
+    }
+
+    public function test_reorder_can_drop_item_at_a_given_position(): void
+    {
+        $this->actingAs($this->admin());
+        $ids = collect(['A', 'B', 'C', 'D'])->map(fn ($n, $i) => Package::create(['name' => $n, 'price' => '1', 'color' => 'blue', 'sort_order' => $i])->id);
+
+        $this->postJson("/admin/urutan/paket/{$ids[3]}/to", ['position' => 2])->assertNoContent();
+        $this->assertSame(['A', 'D', 'B', 'C'], Package::orderBy('sort_order')->pluck('name')->all());
+
+        $this->postJson("/admin/urutan/paket/{$ids[0]}/to", ['position' => 99])->assertNoContent();
+        $this->assertSame(['D', 'B', 'C', 'A'], Package::orderBy('sort_order')->pluck('name')->all());
     }
 
     public function test_gallery_categories_can_be_added_and_removed_from_the_form(): void
@@ -465,8 +482,8 @@ class AksataTest extends TestCase
     public function test_public_disk_serves_from_public_uploads_without_storage_link(): void
     {
         $this->assertSame(public_path('uploads'), config('filesystems.disks.public.root'));
-        $this->assertSame('/uploads/gallery/a.jpg', \App\Models\Media::url('gallery/a.jpg'));
-        $this->assertSame('https://x.test/a.jpg', \App\Models\Media::url('https://x.test/a.jpg'));
+        $this->assertSame('/uploads/gallery/a.jpg', Media::url('gallery/a.jpg'));
+        $this->assertSame('https://x.test/a.jpg', Media::url('https://x.test/a.jpg'));
     }
 
     public function test_apostrophes_in_content_do_not_break_pages(): void

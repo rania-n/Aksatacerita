@@ -25,7 +25,11 @@
   cards.forEach((card) => {
     const activate = () => { cards.forEach((c) => c.classList.toggle('active', c === card)); };
     card.addEventListener('mouseenter', activate);
-    card.addEventListener('click', activate);
+    card.addEventListener('click', (e) => {
+      activate();
+      const btn = $('.package-select[data-open-booking]', card);
+      if (btn && !e.target.closest('a, button')) btn.click();
+    });
   });
 
   // Booking drawer
@@ -178,6 +182,12 @@
     });
   }
   if (frameCards.length) renderFrames();
+  frameCards.forEach((c) => c.addEventListener('click', (e) => {
+    const link = $('.frame-meta a', c);
+    if (link && !e.target.closest('a')) window.open(link.href, '_blank', 'noopener');
+  }));
+  // Pastikan filter default selalu "Semua"
+  [frameFilters, filters].forEach((group) => group.forEach((b, i) => b.classList.toggle('active', i === 0)));
 
   // Photobooth playground
   const machine = $('.booth-machine');

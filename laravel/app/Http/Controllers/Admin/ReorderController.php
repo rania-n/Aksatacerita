@@ -8,6 +8,7 @@ use App\Models\GalleryItem;
 use App\Models\InstagramPost;
 use App\Models\Package;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 /** Geser urutan item naik/turun di daftar admin; setelahnya halaman kembali tepat ke item tersebut. */
 class ReorderController extends Controller
@@ -20,9 +21,9 @@ class ReorderController extends Controller
         'instagram' => [InstagramPost::class, 'admin.instagram.index'],
     ];
 
-    public function __invoke(string $type, int $id, string $direction)
+    public function __invoke(Request $request, string $type, int $id, string $direction)
     {
-        abort_unless(isset(self::TYPES[$type]) && in_array($direction, ['up', 'down'], true), 404);
+        abort_unless(isset(self::TYPES[$type]) && in_array($direction, ['up', 'down', 'to'], true), 404);
 
         [$class, $route] = self::TYPES[$type];
         /** @var class-string<Model> $class */
@@ -30,14 +31,22 @@ class ReorderController extends Controller
         $from = array_search($id, $ids, true);
         abort_if($from === false, 404);
 
-        $to = $direction === 'up' ? $from - 1 : $from + 1;
-        if (isset($ids[$to])) {
-            [$ids[$from], $ids[$to]] = [$ids[$to], $ids[$from]];
+        if ($direction === 'to') {
+            $to = max(0, min(count($ids) - 1, (int) $request->input('position', 1) - 1));
+            array_splice($ids, $to, 0, array_splice($ids, $from, 1));
+        } else {
+            $to = $direction === 'up' ? $from - 1 : $from + 1;
+            if (isset($ids[$to])) {
+                [$ids[$from], $ids[$to]] = [$ids[$to], $ids[$from]];
+            }
+        }
+
+        if ($to !== $from) {
             foreach ($ids as $position => $itemId) {
                 $class::whereKey($itemId)->update(['sort_order' => $position]);
             }
         }
 
-        return redirect()->to(route($route).'#item-'.$type.'-'.$id);
+        return $request->expectsJson() ? response()->noContent() : redirect()->to(route($route).'#item-'.$type.'-'.$id);
     }
 }

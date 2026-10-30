@@ -308,7 +308,8 @@
     const checks = () => $$('.bulk-check');
     const all = $('.bulk-all', bulk);
     const count = $('.bulk-count', bulk);
-    const buttons = $$('button', bulk);
+    const buttons = $$('.bulk-actions button', bulk);
+    const toggleBtn = $('[data-bulk-toggle]', bulk);
     const refresh = () => {
       const list = checks();
       const n = list.filter((c) => c.checked).length;
@@ -325,8 +326,115 @@
       const n = checks().filter((c) => c.checked).length;
       if (e.submitter && e.submitter.value === 'delete' && !confirm(`Hapus ${n} item yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) e.preventDefault();
     });
+    toggleBtn.addEventListener('click', () => {
+      const on = !bulk.classList.contains('selecting');
+      bulk.classList.toggle('selecting', on);
+      document.body.classList.toggle('selecting', on);
+      toggleBtn.setAttribute('aria-pressed', String(on));
+      $('span', toggleBtn).textContent = on ? 'Batal' : 'Pilih';
+      if (!on) checks().forEach((c) => { c.checked = false; });
+      refresh();
+    });
     refresh();
   }
+
+  // ---------- Urutan: tahan lalu geser (mouse & sentuh); tersimpan otomatis ----------
+  const ITEM = '.admin-item, .gallery-admin > article';
+  const HOLD_MS = 350;
+  const itemsOf = (list) => Array.from(list.children).filter((el) => el.matches(ITEM));
+  const syncEdges = (list) => {
+    const items = itemsOf(list);
+    items.forEach((el, i) => {
+      const up = $('form[action$="/up"] button', el);
+      const down = $('form[action$="/down"] button', el);
+      if (up) up.disabled = i === 0;
+      if (down) down.disabled = i === items.length - 1;
+    });
+  };
+  let drag = null;
+  let pending = null;
+
+  const finish = async (save) => {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    cancelAnimationFrame(d.raf);
+    d.item.classList.remove('dragging');
+    document.body.classList.remove('is-sorting');
+    const index = itemsOf(d.list).indexOf(d.item);
+    if (!save || index === d.start) { if (!save) d.list.insertBefore(d.item, d.next); syncEdges(d.list); return; }
+    syncEdges(d.list);
+    try {
+      const res = await fetch(d.url, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `position=${index + 1}`,
+      });
+      if (!res.ok) throw new Error(String(res.status));
+    } catch (err) {
+      d.list.insertBefore(d.item, d.next);
+      syncEdges(d.list);
+      alert('Urutan gagal disimpan. Coba lagi, atau pakai tombol ▲ ▼.');
+    }
+  };
+
+  const startDrag = (item, e) => {
+    const handle = $('.drag-handle', item);
+    if (!handle) return;
+    drag = { item, list: item.parentElement, next: item.nextSibling, start: itemsOf(item.parentElement).indexOf(item), url: handle.dataset.sortUrl, x: e.clientX, y: e.clientY, raf: 0 };
+    item.classList.add('dragging');
+    document.body.classList.add('is-sorting');
+    if (navigator.vibrate) navigator.vibrate(15);
+    const tick = () => {
+      if (!drag) return;
+      const edge = 70;
+      if (drag.y < edge) window.scrollBy(0, -Math.ceil((edge - drag.y) / 5));
+      else if (drag.y > window.innerHeight - edge) window.scrollBy(0, Math.ceil((drag.y - (window.innerHeight - edge)) / 5));
+      place();
+      drag.raf = requestAnimationFrame(tick);
+    };
+    drag.raf = requestAnimationFrame(tick);
+  };
+
+  const place = () => {
+    const { item, list, x, y } = drag;
+    const over = itemsOf(list).find((el) => {
+      if (el === item) return false;
+      const r = el.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    });
+    if (!over) return;
+    const before = item.compareDocumentPosition(over) & Node.DOCUMENT_POSITION_FOLLOWING;
+    list.insertBefore(item, before ? over.nextSibling : over);
+  };
+
+  const clearPending = () => { if (pending) { clearTimeout(pending.timer); pending = null; } };
+
+  document.addEventListener('pointerdown', (e) => {
+    if (e.button > 0) return;
+    const item = e.target.closest && e.target.closest(ITEM);
+    if (!item || !$('.drag-handle', item) || e.target.closest('a, button, input, select, textarea, label, form')) return;
+    const onHandle = !!e.target.closest('.drag-handle');
+    if (onHandle) {
+      e.preventDefault();
+      startDrag(item, e);
+      return;
+    }
+    pending = { x: e.clientX, y: e.clientY, timer: setTimeout(() => { const p = pending; pending = null; if (p) startDrag(item, { clientX: p.x, clientY: p.y }); }, HOLD_MS) };
+  });
+
+  document.addEventListener('pointermove', (e) => {
+    if (pending && Math.hypot(e.clientX - pending.x, e.clientY - pending.y) > 8) clearPending();
+    if (!drag) return;
+    drag.x = e.clientX;
+    drag.y = e.clientY;
+  });
+
+  ['pointerup', 'pointercancel'].forEach((t) => document.addEventListener(t, () => { clearPending(); finish(t === 'pointerup'); }));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') finish(false); });
+  // Cegah halaman ikut bergulir saat item sedang digeser di layar sentuh
+  document.addEventListener('touchmove', (e) => { if (drag && e.cancelable) e.preventDefault(); }, { passive: false });
+  document.addEventListener('contextmenu', (e) => { if (drag || pending) e.preventDefault(); });
 
   // ---------- Pratinjau pengaturan ----------
   const set = $('[data-preview="settings"]');

@@ -73,9 +73,9 @@ h1 em,h2 i { color:var(--blue);font-family:Georgia,serif;font-weight:400; }
 .moving-type i { color:var(--blue);font-style:normal;font-size:25px; }
 @keyframes marquee { to{transform:translateX(-50%)} }
 .section { padding-block:120px; }
-.section-heading { display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:55px; }
+.section-heading { display:block;margin-bottom:55px; }
 .section-heading h2,.gallery-title h2,.visit h2 { font-size:clamp(45px,5vw,68px); }
-.section-heading>p { max-width:310px;color:var(--muted);line-height:1.6;font-size:14px; }
+.section-heading>p { margin-top:20px;max-width:420px;color:var(--muted);line-height:1.6;font-size:14px; }
 .kicker { color:var(--blue);font:700 10px "Space Grotesk";letter-spacing:2px;display:block;margin-bottom:22px; }
 .package-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;max-width:1060px;margin-inline:auto; }
 .package-card { min-height:405px;border:1.5px solid #ddd;padding:23px;display:flex;flex-direction:column;justify-content:space-between;transition:.25s;position:relative;overflow:hidden; }
@@ -94,7 +94,7 @@ h1 em,h2 i { color:var(--blue);font-family:Georgia,serif;font-weight:400; }
 .package-select { color:var(--card);font:700 12px "Space Grotesk";display:flex;justify-content:space-between;border:0;background:none;padding:0;width:100%; }
 .package-footnote { text-align:center;font-size:12px;color:#777;margin-top:40px; }.package-footnote a{color:var(--blue);font-weight:700}
 .frames-section { background:#f4f3ef;padding:110px 0;overflow:hidden; }
-.section-heading.compact { align-items:center; }
+.section-heading.compact .limited-pill { display:inline-block;margin-top:20px; }
 .limited-pill { border:1px solid #bbb;border-radius:30px;padding:10px 16px;font-size:11px; }.limited-pill span{color:var(--orange)}
 .frames-scroll { display:grid;grid-template-columns:repeat(4,1fr);gap:24px; }
 .frame-strip { padding:15px;min-height:470px;display:flex;flex-direction:column;gap:10px;transition:.25s; }
@@ -187,3 +187,23 @@ footer { background:#0d0d0d;color:white;padding:65px 0 25px; }.footer-top{displa
 .frame-filters{margin:0 0 35px}
 .frames-more,.gallery-more{text-align:center;margin-top:40px}
 .frame-wrap[hidden]{display:none!important}
+
+.package-card,.frame-wrap{cursor:pointer}
+.frames-hint{display:none}
+@media (max-width:800px){
+  .frames-scroll .frame-wrap[hidden]{display:block!important}
+  .frames-more{display:none!important}
+  .frames-hint{display:block;margin:0 0 12px;font:600 11px "Space Grotesk";letter-spacing:1px;color:var(--muted);text-align:right}
+}
+
+/* Galeri: ukuran mengikuti foto asli (tanpa crop), desktop & mobile */
+.masonry{display:block;column-count:3;column-gap:12px}
+.masonry figure,.masonry figure.tall{grid-row:auto;display:block;break-inside:avoid;margin:0 0 12px}
+.masonry img{height:auto;display:block}
+@media (max-width:800px){.masonry{column-count:2}}
+
+/* Header bagian 01 & 02 rata tengah */
+.section-heading{text-align:center}
+.section-heading>p{margin-inline:auto}
+.section-heading.compact .limited-pill{display:inline-block}
+.section-heading.compact .limited-note{margin:20px auto 0;font:600 11px "Space Grotesk";letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}

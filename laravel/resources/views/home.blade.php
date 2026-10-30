@@ -112,11 +112,12 @@
     @if ($s['show_frames'] === '1' && $frames->isNotEmpty())
     <section class="frames-section" id="frame">
         <div class="shell">
-            <div class="section-heading compact"><div><span class="kicker">02 — FRAME OF THE MONTH</span><h2>Pilih mood.<br><i>Cetak ceritamu.</i></h2></div><div class="limited-pill"><span>●</span> Updated monthly</div></div>
+            <div class="section-heading compact"><div><span class="kicker">02 — FRAME OF THE MONTH</span><h2>Pilih mood.<br><i>Cetak ceritamu.</i></h2></div><p class="limited-note">Updated monthly</p></div>
             @php $frameTypes = $frames->pluck('type')->filter()->unique()->values(); @endphp
             @if ($frameTypes->count() > 1)
             <div class="filters frame-filters">@foreach ($frameTypes->prepend('Semua') as $type)<button type="button" data-type="{{ $type }}" class="{{ $loop->first ? 'active' : '' }}">{{ $type }}</button>@endforeach</div>
             @endif
+            <p class="frames-hint">Geser ke samping →</p>
             <div class="frames-scroll">
                 @foreach ($frames as $i => $frame)
                     @php $code = str_pad($i + 1, 2, '0', STR_PAD_LEFT); @endphp

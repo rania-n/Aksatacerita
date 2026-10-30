@@ -3,8 +3,7 @@
 @section('desc', 'Daftar paket yang tampil di bagian "Pilih ceritamu" pada website. Ubah urutan dengan tombol panah.')
 @section('content')
 <section class="panel">
-    <div class="panel-head"><div><span>DAFTAR LAYANAN</span><h2>{{ $items->count() }} paket</h2></div><a class="btn btn-primary btn-sm" href="{{ route('admin.packages.create') }}"><x-icon name="plus" :size="16" /> Tambah paket</a></div>
-    @if ($items->isNotEmpty())<x-bulk-bar type="paket" />@endif
+    <div class="panel-head"><div><span>DAFTAR LAYANAN</span><h2>{{ $items->count() }} paket</h2></div>@if ($items->isNotEmpty())<x-bulk-bar type="paket" />@endif<a class="btn btn-primary btn-sm" href="{{ route('admin.packages.create') }}"><x-icon name="plus" :size="16" /> Tambah paket</a></div>
     <div class="admin-list">
         @forelse ($items as $item)
             <div id="item-paket-{{ $item->id }}" class="admin-item {{ $item->is_active ? '' : 'off' }}">
