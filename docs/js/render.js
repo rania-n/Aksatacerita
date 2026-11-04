@@ -34,7 +34,7 @@
   };
   const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[name] || ''}</svg>`;
 
-  const brand = (light) => `<a class="brand official-brand ${light ? 'brand-light' : ''}" href="./" aria-label="Aksata Cerita"><span class="brand-crop"><img src="assets/aksata-logo.png" alt="Aksata Cerita"></span></a>`;
+  const brand = (light) => `<a class="brand official-brand ${light ? 'brand-light' : ''}" href="./" aria-label="Aksata Cerita"><span class="brand-crop"><img src="assets/aksata-logo-crop.png" alt="Aksata Cerita"></span></a>`;
 
   function packageCard(pkg, active, iconName) {
     const color = hexOf(pkg.color);
@@ -128,7 +128,7 @@
     <section class="section shell" id="paket">
       <div class="section-heading"><div><span class="kicker">01 — PILIH CERITAMU</span><h2>Good moments,<br><i>fair prices.</i></h2></div><p>Dari foto formal sampai pose paling chaos—ada sesi untuk setiap cerita.</p></div>
       <div class="package-grid">${packages.length ? packages.map((pkg, i) => packageCard(pkg, pkg.id === featured, icons[i % 3])).join('') : '<p class="package-footnote" style="grid-column:1/-1">Paket segera hadir. Hubungi kami lewat WhatsApp untuk info terbaru.</p>'}</div>
-      <p class="package-footnote">Butuh photobooth untuk wedding, brand activation, atau event? <a href="${waText.split('?')[0]}?text=${encodeURIComponent('Halo, aku mau tanya photobooth untuk event.')}" target="_blank" rel="noreferrer">Let's collaborate ↗</a></p>
+      <div class="collab-cta"><p>Butuh photobooth untuk <b>wedding</b>, <b>brand activation</b>, atau <b>event</b>?</p><a href="${waText.split('?')[0]}?text=${encodeURIComponent('Halo, aku mau tanya photobooth untuk event.')}" target="_blank" rel="noreferrer">Let's collaborate ↗</a></div>
     </section>
 
     ${showFrames ? `<section class="frames-section" id="frame"><div class="shell">
@@ -140,7 +140,7 @@
     </div></section>` : ''}
 
     ${s.show_booth === '1' ? `<section class="booth-lab"><div class="shell booth-grid">
-      <div class="booth-copy"><span class="kicker">AKSATA PLAYGROUND — BETA</span><h2>Try the booth.<br><i>Strike a pose!</i></h2><p>Pemanasan dulu sebelum datang ke studio. Tekan tombol shutter dan tunjukkan pose paling ikonikmu.</p><div class="booth-tips"><span>01&nbsp; LOOK</span><span>02&nbsp; POSE</span><span>03&nbsp; SNAP!</span></div></div>
+      <div class="booth-copy"><span class="kicker">AKSATA CERITA PLAYGROUND — BETA</span><h2>Try the booth.<br><i>Strike a pose!</i></h2><p>Pemanasan dulu sebelum datang ke studio. Tekan tombol shutter dan tunjukkan pose paling ikonikmu.</p><div class="booth-tips"><span>01&nbsp; LOOK</span><span>02&nbsp; POSE</span><span>03&nbsp; SNAP!</span></div></div>
       <div class="booth-machine" data-photos="${esc(JSON.stringify(photos))}">
         <div class="machine-top">${brand(false)}<span>LIVE PREVIEW <i></i></span></div>
         <div class="booth-screen">${photos.length ? `<img src="${esc(p(0))}" alt="Preview photobooth interaktif">` : ''}<div class="screen-grid"></div><span class="rec-badge">● REC</span><span class="frame-counter">FRAME 01</span><div class="screen-caption">YOU LOOK<br><b>AMAZING!</b></div></div>
