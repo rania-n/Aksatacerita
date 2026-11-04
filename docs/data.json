@@ -17,8 +17,8 @@
     "tiktok": "",
     "facebook": "",
     "hero_line1": "Abadikan cerita",
-    "hero_line2": "serumu di",
-    "hero_highlight": "Aksata.",
+    "hero_line2": "serumu diㅤㅤ",
+    "hero_highlight": "Aksata Cerita.",
     "hero_text": "Masuk, pilih pose paling random, lalu bawa pulang potongan cerita yang nggak akan terulang dua kali.",
     "proof_show": "1",
     "proof_rating": "4.9 / 5",
@@ -45,6 +45,7 @@
       "price_note": "",
       "price_amount": 25000,
       "price_style": "k",
+      "price_max_amount": null,
       "old_price_amount": null,
       "addon_price_amount": 15000,
       "addon_text": "2 Cetakan 2R atau 1 Cetakan 4R sama dengan sesi sebelumnya",
@@ -59,29 +60,6 @@
       "is_featured": true
     },
     {
-      "id": "7",
-      "name": "Pasport Photobooth",
-      "description": "",
-      "duration_value": null,
-      "duration_unit": "menit",
-      "price_note": "",
-      "price_amount": 35000,
-      "price_style": "k",
-      "old_price_amount": null,
-      "addon_price_amount": 15000,
-      "addon_text": "1 Set Pasport + Boarding Pass",
-      "tag": "",
-      "color": "#ff6738",
-      "features": [
-        "1 Cetakan 4R",
-        "1 Set Pasport + Boarding Pass",
-        "Gif, Original Photo, Photo Frame",
-        "Bisa re-take foto kalian",
-        "1 Sesi 1 Tema Background"
-      ],
-      "is_featured": false
-    },
-    {
       "id": "6",
       "name": "ID Card",
       "description": "",
@@ -90,6 +68,7 @@
       "price_note": "",
       "price_amount": 25000,
       "price_style": "k",
+      "price_max_amount": null,
       "old_price_amount": null,
       "addon_price_amount": 15000,
       "addon_text": "1 Cetakan ID CARD sama dengan sesi sebelumnya",
@@ -112,6 +91,7 @@
       "price_note": "",
       "price_amount": 35000,
       "price_style": "k",
+      "price_max_amount": null,
       "old_price_amount": null,
       "addon_price_amount": 15000,
       "addon_text": "1 Cetakan DVD sama dengan sesi sebelumnya",
@@ -119,6 +99,30 @@
       "color": "#b7e433",
       "features": [
         "1 Cetakan DVD",
+        "Gif, Original Photo, Photo Frame",
+        "Bisa re-take foto kalian",
+        "1 Sesi 1 Tema Background"
+      ],
+      "is_featured": false
+    },
+    {
+      "id": "7",
+      "name": "Pasport Photobooth",
+      "description": "",
+      "duration_value": null,
+      "duration_unit": "menit",
+      "price_note": "",
+      "price_amount": 35000,
+      "price_style": "k",
+      "price_max_amount": null,
+      "old_price_amount": null,
+      "addon_price_amount": 15000,
+      "addon_text": "1 Set Pasport + Boarding Pass",
+      "tag": "",
+      "color": "#ff6738",
+      "features": [
+        "1 Cetakan 4R",
+        "1 Set Pasport + Boarding Pass",
         "Gif, Original Photo, Photo Frame",
         "Bisa re-take foto kalian",
         "1 Sesi 1 Tema Background"
@@ -134,6 +138,7 @@
       "price_note": "",
       "price_amount": 25000,
       "price_style": "k",
+      "price_max_amount": null,
       "old_price_amount": null,
       "addon_price_amount": 15000,
       "addon_text": "1 Cetakan koran",
@@ -141,6 +146,27 @@
       "color": "#8b8b8b",
       "features": [
         "1 Cetakan koran"
+      ],
+      "is_featured": false
+    },
+    {
+      "id": "a6b5ed85-4e13-44b9-b0c4-5ab8649a94cb",
+      "name": "Request Frame",
+      "description": "",
+      "duration_value": null,
+      "duration_unit": "menit",
+      "price_note": "",
+      "price_amount": 30000,
+      "price_style": "k",
+      "price_max_amount": 50000,
+      "old_price_amount": null,
+      "addon_price_amount": null,
+      "addon_text": "",
+      "tag": "",
+      "color": "#8b5cf6",
+      "features": [
+        "2 Strip Cetakan",
+        "Harga fix wajib via chat"
       ],
       "is_featured": false
     }
@@ -559,60 +585,6 @@
       "size": "",
       "color": "#0022ff",
       "image": "img/frames/20260805-154227-1.webp"
-    },
-    {
-      "id": "142",
-      "name": "DVD 02",
-      "label": "",
-      "type": "DVD Photobooth",
-      "size": "",
-      "color": "#0022ff",
-      "image": "img/frames/20260805_154227.webp"
-    },
-    {
-      "id": "143",
-      "name": "DVD 03",
-      "label": "",
-      "type": "DVD Photobooth",
-      "size": "",
-      "color": "#0022ff",
-      "image": "img/frames/20260805_154236.webp"
-    },
-    {
-      "id": "144",
-      "name": "DVD 04",
-      "label": "",
-      "type": "DVD Photobooth",
-      "size": "",
-      "color": "#0022ff",
-      "image": "img/frames/20260805-155013-1.webp"
-    },
-    {
-      "id": "145",
-      "name": "DVD 05",
-      "label": "",
-      "type": "DVD Photobooth",
-      "size": "",
-      "color": "#0022ff",
-      "image": "img/frames/20260805_155013.webp"
-    },
-    {
-      "id": "146",
-      "name": "DVD 06",
-      "label": "",
-      "type": "DVD Photobooth",
-      "size": "",
-      "color": "#0022ff",
-      "image": "img/frames/20260805_160226.webp"
-    },
-    {
-      "id": "147",
-      "name": "DVD 07",
-      "label": "",
-      "type": "DVD Photobooth",
-      "size": "",
-      "color": "#0022ff",
-      "image": "img/frames/20260805_162445.webp"
     }
   ],
   "gallery": [
@@ -623,16 +595,10 @@
       "image": "img/gallery/pmIu0hFZ1bz4ii2kOnpUVG6Ehvech89V9UdTSRvP.webp"
     },
     {
-      "id": "61",
-      "title": "😱🥶",
-      "category": "Event",
-      "image": "img/gallery/IjrAwr0FZIeLom4fR5Cl7jzdmD6ikYTsoJvA8e6w.webp"
-    },
-    {
-      "id": "c9da9286-353e-4904-a61c-6f31fb236a2e",
-      "title": "Pet 🙈",
-      "category": "Bestie",
-      "image": "img/gallery/1bnTWsGtynzB9zG6U1yfNXqpii5mbNhhA.jpg"
+      "id": "52",
+      "title": "Heart Check",
+      "category": "Couple",
+      "image": "img/gallery/heart-check.webp"
     },
     {
       "id": "48",
@@ -641,22 +607,28 @@
       "image": "img/gallery/cowboy-besties.webp"
     },
     {
+      "id": "61",
+      "title": "😱🥶",
+      "category": "Event",
+      "image": "img/gallery/IjrAwr0FZIeLom4fR5Cl7jzdmD6ikYTsoJvA8e6w.webp"
+    },
+    {
       "id": "49",
       "title": "Denim Day Out",
       "category": "Bestie",
       "image": "img/gallery/denim-day-out.webp"
     },
     {
+      "id": "c9da9286-353e-4904-a61c-6f31fb236a2e",
+      "title": "Pet 🙈",
+      "category": "Bestie",
+      "image": "img/gallery/1bnTWsGtynzB9zG6U1yfNXqpii5mbNhhA.jpg"
+    },
+    {
       "id": "51",
       "title": "Soft Girls Club",
       "category": "Bestie",
       "image": "img/gallery/soft-girls-club.webp"
-    },
-    {
-      "id": "52",
-      "title": "Heart Check",
-      "category": "Couple",
-      "image": "img/gallery/heart-check.webp"
     },
     {
       "id": "53",
@@ -711,5 +683,5 @@
       "url": "https://www.instagram.com/reel/DewIMyjiRr2/"
     }
   ],
-  "updated_at": "2026-10-30T11:48:23.473Z"
+  "updated_at": "2026-11-04T02:22:38.326Z"
 }

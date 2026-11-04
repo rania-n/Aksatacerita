@@ -2,7 +2,7 @@
 
 :root { --blue:#0022ff; --ink:#111; --muted:#5c5c5c; --paper:#fff; --soft:#f6f6f3; --orange:#ff6738; --pink:#ff79b8; --green:#b7e433; }
 * { box-sizing:border-box; }
-html { scroll-behavior:smooth; }
+html { scroll-behavior:smooth;overscroll-behavior-y:none; }
 body { margin:0; color:var(--ink); background:var(--paper); font-family:"DM Sans",sans-serif; }
 body:after { content:"";position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E"); }
 .scroll-progress { position:fixed;left:0;top:0;height:3px;background:var(--orange);z-index:100;transition:width .1s linear; }
@@ -78,7 +78,7 @@ h1 em,h2 i { color:var(--blue);font-family:Georgia,serif;font-weight:400; }
 .section-heading>p { margin-top:20px;max-width:420px;color:var(--muted);line-height:1.6;font-size:14px; }
 .kicker { color:var(--blue);font:700 10px "Space Grotesk";letter-spacing:2px;display:block;margin-bottom:22px; }
 .package-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;max-width:1060px;margin-inline:auto; }
-.package-card { min-height:405px;border:1.5px solid #ddd;padding:23px;display:flex;flex-direction:column;justify-content:space-between;transition:.25s;position:relative;overflow:hidden; }
+.package-card { min-height:405px;border:1.5px solid #ddd;padding:23px;display:flex;flex-direction:column;justify-content:flex-start;transition:.25s;position:relative;overflow:hidden; }
 .package-card:after { content:"";position:absolute;width:120px;height:120px;border-radius:50%;background:var(--card,#ddd);opacity:.1;right:-30px;top:60px; }
 .package-card.blue{--card:var(--blue)}.package-card.orange{--card:var(--orange)}.package-card.pink{--card:var(--pink)}
 .package-card.active { border:2px solid var(--card);transform:translateY(-8px);box-shadow:8px 8px 0 var(--card); }
@@ -88,7 +88,12 @@ h1 em,h2 i { color:var(--blue);font-family:Georgia,serif;font-weight:400; }
 .package-card p { font-size:11px;color:#777;margin:0; }
 .package-card strong { font:700 51px "Space Grotesk";letter-spacing:-4px; }
 .package-card strong small { font-size:16px;letter-spacing:0;margin-right:4px; }
-.package-card ul { padding:0;list-style:none;border-top:1px solid #ddd;margin:0; }
+.package-card ul { padding:0;list-style:none;border-top:1px solid #ddd;margin:14px 0 0;flex:1; }
+.package-card .package-note { min-height:14px; }
+.package-card strong.has-range { white-space:nowrap; }
+@media (max-width:380px){.package-card strong.has-range{font-size:42px;letter-spacing:-3px}}
+.package-select { margin-top:16px; }
+.hero h1 em { white-space:nowrap; }
 .package-card li { padding:9px 0;border-bottom:1px solid #eee;font-size:12px; }
 .package-card li span { color:var(--card);margin-right:9px; }
 .package-select { color:var(--card);font:700 12px "Space Grotesk";display:flex;justify-content:space-between;border:0;background:none;padding:0;width:100%; }
@@ -207,3 +212,12 @@ footer { background:#0d0d0d;color:white;padding:65px 0 25px; }.footer-top{displa
 .section-heading>p{margin-inline:auto}
 .section-heading.compact .limited-pill{display:inline-block}
 .section-heading.compact .limited-note{margin:20px auto 0;font:600 11px "Space Grotesk";letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+
+.credit a{text-decoration:underline;text-underline-offset:3px;font-weight:700}.credit a:hover{color:var(--orange)}
+
+/* Kartu cadangan feed Instagram (tampil bila embed Instagram belum/tidak termuat) */
+.ig-item blockquote.instagram-media{display:grid;place-items:center;min-height:220px;padding:28px 20px;background:linear-gradient(135deg,#f9ce34 0%,#ee2a7b 55%,#6228d7 100%);color:#fff;text-align:center;border:0;border-radius:6px}
+.ig-item blockquote.instagram-media a{color:#fff;font:700 14px "Space Grotesk",sans-serif;border:1.5px solid #fff;padding:11px 18px;border-radius:40px}
+.ig-item blockquote.instagram-media a:after{content:" ↗"}
+.ig-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:24px}
+.ig-item{flex:0 1 380px;width:100%;max-width:380px}

@@ -51,7 +51,8 @@ var SCHEMA = {
     { k: 'tag', h: 'tag', t: 'text', list: 'options_package_tag', label: 'Label (Best Seller, Promo…)' },
     { k: 'color', h: 'warna', t: 'color', label: 'Warna kartu' },
     { k: 'features', h: 'fitur', t: 'list', label: 'Isi paket (satu baris satu poin)' },
-    { k: 'is_featured', h: 'unggulan', t: 'bool', label: 'Paket unggulan' }
+    { k: 'is_featured', h: 'unggulan', t: 'bool', label: 'Paket unggulan' },
+    { k: 'price_max_amount', h: 'harga_sampai', t: 'number', after: 'price_amount', label: 'Harga sampai (opsional, untuk rentang mis. 30K – 50K)' }
   ] },
   frame: { sheet: 'Frame', label: 'Frame', singular: 'frame', imgDir: 'frames', titleKey: 'name', fields: [
     { k: 'active', h: 'aktif', t: 'bool', label: 'Tampilkan di situs' },
@@ -208,6 +209,7 @@ function writeRows_(kind, rows) {
   var sh = sheet_(def.sheet);
   var width = def.fields.length + 1;
   formatSheet_(kind);
+  sh.getRange(1, 1, 1, width).setValues([['id'].concat(def.fields.map(function (f) { return f.h; }))]);
   var last = sh.getLastRow();
   if (last > 1) sh.getRange(2, 1, last - 1, width).clearContent();
   if (rows.length) {
@@ -251,6 +253,7 @@ function buildPublicData_() {
         id: p.id, name: p.name, description: p.description,
         duration_value: p.duration_value === '' ? null : p.duration_value, duration_unit: p.duration_unit || 'menit',
         price_note: p.price_note, price_amount: p.price_amount === '' ? 0 : p.price_amount, price_style: p.price_style || 'k',
+        price_max_amount: p.price_max_amount === '' ? null : p.price_max_amount,
         old_price_amount: p.old_price_amount === '' ? null : p.old_price_amount,
         addon_price_amount: p.addon_price_amount === '' ? null : p.addon_price_amount, addon_text: p.addon_text,
         tag: p.tag, color: p.color,
@@ -326,6 +329,31 @@ function api_saveSettings(obj) {
 }
 
 /** Simpan foto (sudah diperkecil di browser) ke Drive, bisa dilihat siapa saja yang punya link. */
+/** Ambil koordinat dari link Google Maps (termasuk link pendek) atau teks "lat, long". */
+function api_parseLocation(text) {
+  requireAdmin_();
+  var t = String(text || '').trim();
+  var find = function (str) {
+    var m = str.match(/^\s*(-?\d{1,3}\.\d+)\s*[,\s]\s*(-?\d{1,3}\.\d+)\s*$/) ||
+      str.match(/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/) ||
+      str.match(/@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/) ||
+      str.match(/[?&](?:q|ll|query|center|destination)=(-?\d{1,3}\.\d+)(?:,|%2C)(-?\d{1,3}\.\d+)/i);
+    return m ? { lat: m[1], lon: m[2] } : null;
+  };
+  var url = t, hit = find(decodeURIComponent(t.replace(/%(?![0-9a-f]{2})/gi, '%25')));
+  for (var i = 0; !hit && i < 5; i++) {
+    var host = (url.match(/^https:\/\/([^\/?#]+)/i) || [])[1] || '';
+    if (!/(^|\.)(google\.[a-z.]+|goo\.gl)$/i.test(host)) throw new Error('Tempel link dari Google Maps (https://maps.app.goo.gl/… atau google.com/maps/…), atau tulis koordinat seperti: -8.0725, 111.9137');
+    var res = UrlFetchApp.fetch(url, { followRedirects: false, muteHttpExceptions: true });
+    var loc = res.getHeaders()['Location'] || res.getHeaders()['location'];
+    if (!loc) { hit = find(res.getContentText().slice(0, 200000)); break; }
+    url = loc;
+    hit = find(decodeURIComponent(url.replace(/%(?![0-9a-f]{2})/gi, '%25')));
+  }
+  if (!hit) throw new Error('Koordinat tidak ketemu di link itu. Coba buka tempatnya di Google Maps, tekan Bagikan, lalu Salin link.');
+  return hit;
+}
+
 function api_upload(dataUrl, name) {
   requireAdmin_();
   var m = /^data:(image\/[a-z+.-]+);base64,(.+)$/i.exec(dataUrl);
@@ -450,7 +478,7 @@ function importFromGithub() {
   var d = JSON.parse(res.getContentText());
   writeRows_('paket', (d.packages || []).map(function (p) {
     return { id: p.id, active: true, name: p.name, description: p.description || '', duration_value: p.duration_value, duration_unit: p.duration_unit,
-      price_note: p.price_note || '', price_amount: p.price_amount, price_style: p.price_style, old_price_amount: p.old_price_amount,
+      price_note: p.price_note || '', price_amount: p.price_amount, price_style: p.price_style, price_max_amount: p.price_max_amount, old_price_amount: p.old_price_amount,
       addon_price_amount: p.addon_price_amount, addon_text: p.addon_text || '', tag: p.tag || '', color: p.color, features: (p.features || []).join('\n'), is_featured: p.is_featured };
   }));
   writeRows_('frame', (d.frames || []).map(function (f) {

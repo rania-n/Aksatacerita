@@ -5,24 +5,39 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Aksata Cerita</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap">
 <style>
-:root{--blue:#0022ff;--ink:#111;--muted:#777;--line:#e4e4e1;--soft:#f6f6f3;--red:#d22}
+:root{--blue:#0022ff;--ink:#111;--muted:#777;--line:#e2e2df;--soft:#f4f4f1;--red:#d22;--orange:#ff6738}
 *{box-sizing:border-box}
+html{overscroll-behavior-y:none;background:linear-gradient(90deg,#111 230px,var(--soft) 230px)}
+@media (max-width:860px){html{background:var(--soft)}}
 body{margin:0;background:var(--soft);color:var(--ink);font:14px/1.45 "DM Sans",system-ui,-apple-system,sans-serif}
 button,input,select,textarea{font:inherit}
-header{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:12px 16px;flex-wrap:wrap}
-header h1{font-size:16px;margin:0;margin-right:auto;letter-spacing:-.3px}
-header small{color:var(--muted)}
+.admin{min-height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}
+aside{background:#111;color:#fff;padding:24px 16px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.studio{display:flex;align-items:center;gap:10px;border:1px solid #333;padding:12px;margin-bottom:24px}
+.studio>span{background:var(--blue);width:30px;height:30px;display:grid;place-items:center;font:700 14px "Space Grotesk",sans-serif}
+.studio div{display:flex;flex-direction:column}.studio b{font-size:12px}.studio small{font-size:10px;color:#888}
+.side-link{color:#aaa;font-size:12px;padding:10px 12px;text-decoration:none}.side-link:hover{color:#fff}
+.side-link.first{margin-top:auto}
+.admin-main{min-width:0}
+header{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 28px;min-height:76px;flex-wrap:wrap}
+header h1{font:600 22px "Space Grotesk",sans-serif;margin:0 auto 0 0;letter-spacing:-.5px}
+header small{color:var(--muted);font:400 11px "DM Sans",sans-serif;display:block;letter-spacing:0}
+#dirty{font-size:12px;color:#c60}
 .btn{border:0;background:var(--blue);color:#fff;font-weight:700;font-size:12px;min-height:42px;padding:10px 18px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn.ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
 .btn.danger{background:#fff;color:var(--red);border:1.5px solid var(--red)}
 .btn.sm{min-height:34px;padding:6px 12px}
-nav{display:flex;gap:4px;padding:10px 16px 0;overflow-x:auto;background:#fff;border-bottom:1px solid var(--line)}
-nav button{border:0;background:none;padding:10px 14px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
-nav button.on{color:var(--blue);border-color:var(--blue)}
-main{max-width:980px;margin:18px auto;padding:0 14px 90px}
+nav{display:flex;flex-direction:column;gap:4px}
+nav button{border:0;background:none;padding:12px;font-weight:600;font-size:13px;color:#999;text-align:left;cursor:pointer;white-space:nowrap}
+nav button:hover{color:#fff}
+nav button.on{background:var(--blue);color:#fff}
+main{max-width:1000px;margin:0;padding:26px 28px 90px}
 .panel{background:#fff;border:1px solid var(--line);padding:20px}
+.sticky{position:sticky;top:var(--hh,76px);z-index:20;background:#fff;margin:-20px -20px 8px;padding:16px 20px 10px;border-bottom:1px solid var(--line)}
+.sticky .head{margin-bottom:0}.sticky .bulk{margin:10px 0 0}
 .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .head h2{margin:0 auto 0 0;font-size:20px}
 .head h2 small{display:block;font-size:11px;color:var(--muted);font-weight:500}
@@ -45,10 +60,14 @@ body.selecting .chk{display:inline-block}
 body.selecting .acts .del{display:none}
 .empty{padding:30px;text-align:center;color:var(--muted)}
 body.sorting{user-select:none;-webkit-user-select:none;cursor:grabbing}
-.modal{position:fixed;inset:0;background:#0007;z-index:60;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 12px}
+.modal{position:fixed;inset:0;background:#0007;z-index:60;display:none;align-items:center;justify-content:center;padding:20px 12px;overscroll-behavior:contain}
 .modal.on{display:flex}
-.card{background:#fff;width:min(560px,100%);padding:22px;margin:auto}
-.card h3{margin:0 0 14px;font-size:18px}
+.card{background:#fff;width:min(560px,100%);margin:auto;display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow:hidden}
+.card>h3,.guide>h3{padding:20px 22px 12px;margin:0}
+.card form{display:flex;flex-direction:column;min-height:0;flex:1}
+.fbody{overflow-y:auto;padding:4px 22px 8px;flex:1;min-height:0;overscroll-behavior:contain}
+.locbox{background:#f2f4ff;border:1px solid var(--blue);padding:12px 14px;margin:0 0 14px}.locbox p{margin:4px 0 8px;font-size:12px;color:#555}.locbox input{display:block;width:100%;padding:10px;border:1px solid #ccc;margin-bottom:8px}.locbox small{display:block;margin-top:8px;font-size:12px}
+.card h3{font-size:18px}
 label.f{display:block;margin:0 0 14px;font-weight:600;font-size:12px}
 label.f>span.req{color:var(--red)}
 .f input[type=text],.f input[type=number],.f select,.f textarea{display:block;width:100%;margin-top:6px;padding:10px;border:1px solid #ccc;background:#fff;font-weight:400}
@@ -61,23 +80,64 @@ label.f>span.req{color:var(--red)}
 .switch input{width:20px;height:20px;accent-color:var(--blue)}
 .imgbox{margin-top:6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .imgbox img{max-width:120px;max-height:120px;border:1px solid var(--line);background:#f0f0f0}
-.foot{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.foot{display:flex;gap:10px;justify-content:flex-end;padding:12px 22px;flex-wrap:wrap;background:#fff;border-top:1px solid var(--line);flex-shrink:0}
 .grp{margin:22px 0 10px;font:700 11px "DM Sans";letter-spacing:1.5px;color:var(--blue)}
 .err{color:var(--red);font-size:12px;margin-top:10px}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111;color:#fff;padding:11px 18px;font-size:13px;z-index:90;display:none;max-width:90vw}
 #toast.on{display:block}#toast.bad{background:var(--red)}
 #gate{padding:50px 20px;text-align:center}
+.card.wide{width:min(1000px,100%)}
+.formgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:26px;align-items:start}
+.pvwrap{position:sticky;top:10px}.pvwrap>b{display:block;font:700 10px "DM Sans";letter-spacing:1.5px;color:var(--blue);margin-bottom:8px}
+.pv{position:relative;overflow:hidden;border:1.5px solid #ddd;padding:23px;background:#fff;display:flex;flex-direction:column;min-height:405px}
+.pv:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;background:var(--c,#0022ff);opacity:.1;right:-30px;top:60px}
+.pv .pt{color:var(--c);display:flex}
+.pv h4{margin:20px 0 7px;font:600 23px "Space Grotesk",sans-serif}.pv .pn{font-size:11px;color:#777;min-height:14px}
+.pv .pp{font:700 51px "Space Grotesk",sans-serif;letter-spacing:-4px;white-space:nowrap}.pv .pp small{font-size:16px;letter-spacing:0;margin-right:4px}
+.pv ul{list-style:none;margin:14px 0 0;padding:0;border-top:1px solid #ddd;flex:1}.pv li{padding:9px 0;border-bottom:1px solid #eee;font-size:12px}.pv li:before{content:"✓";color:var(--c);margin-right:9px}
+.pv .pa{border-top:1px dashed #ccc;padding:12px 0 2px;font-size:12px;color:#666;line-height:1.5}.pv .pa b{font:700 12px "Space Grotesk",sans-serif;color:var(--c)}.pv .pa b span{color:#666}
+.pv .ps{color:var(--c);font:700 12px "Space Grotesk",sans-serif;margin-top:16px;display:flex;justify-content:space-between}
+.pvwrap small.hint{display:block;margin-top:8px;color:#888;font-size:11px}
+.hint{display:block;font-weight:400;font-size:11px;color:#888;margin-top:5px}
+details.more{border:1px solid var(--line);background:#fafafa;padding:12px 14px;margin:6px 0 14px}
+details.more summary{cursor:pointer;font-weight:700;font-size:13px}details.more[open] summary{margin-bottom:14px}
+.toggle{display:block;font-size:12px;color:var(--blue);font-weight:700;background:none;border:0;padding:0;margin:-6px 0 14px;cursor:pointer}
+@media (max-width:760px){.formgrid{grid-template-columns:1fr}.pvwrap{position:static}}
+.btn.help{background:#fff;color:#111;border:1px solid #ccc}
+.btn.help:hover{border-color:var(--blue);color:var(--blue)}
+.guide ol{margin:0 0 14px;padding-left:20px}.guide li{margin-bottom:8px;line-height:1.55}
+.guide .tip{background:#fff4e5;border:1px solid var(--orange);padding:10px 12px;font-size:12px;margin:0 0 14px}
+.guide a{color:var(--blue);font-weight:700}
+.head h2,.card h3{font-family:"Space Grotesk",sans-serif}
+@media (max-width:860px){
+.admin{grid-template-columns:minmax(0,1fr)}
+aside{position:static;height:auto;flex-direction:row;align-items:center;gap:8px;padding:10px 12px;overflow-x:auto}
+.studio{margin:0;padding:6px 10px}.studio small,.side-link{display:none}
+nav{flex-direction:row}nav button{padding:9px 12px}
+header{padding:10px 14px;min-height:0}header h1{font-size:17px}
+main{padding:16px 12px 90px}
+}
 @media (max-width:640px){.row{grid-template-columns:44px 1fr}.acts{grid-column:1/-1}}
 </style>
 </head>
 <body>
+<div class="admin">
+<aside>
+  <div class="studio"><span>A</span><div><b>Aksata Cerita</b><small>Admin</small></div></div>
+  <nav id="tabs"></nav>
+  <a class="side-link first" href="https://aksatacerita.github.io/panduan.html" target="_blank" rel="noopener">Panduan lengkap ↗</a>
+  <a class="side-link" href="https://aksatacerita.github.io/" target="_blank" rel="noopener">Lihat situs ↗</a>
+</aside>
+<div class="admin-main">
 <header>
-  <h1>Admin Aksata Cerita <small id="who"></small></h1>
-  <span id="dirty" style="display:none;font-size:12px;color:#c60">Ada perubahan yang belum diterbitkan</span>
+  <h1 id="pageTitle">Admin <small id="who"></small></h1>
+  <span id="dirty" style="display:none">Ada perubahan yang belum diterbitkan</span>
+  <button class="btn help" id="helpBtn" type="button">? Panduan halaman ini</button>
   <button class="btn" id="publish" disabled>Terbitkan ke situs</button>
 </header>
-<nav id="tabs"></nav>
 <main id="view"><div id="gate">Memuat…</div></main>
+</div>
+</div>
 
 <div class="modal" id="modal"><div class="card" id="card"></div></div>
 <div id="toast"></div>
@@ -104,6 +164,7 @@ label.f>span.req{color:var(--red)}
   };
   var setDirty = function (on) {
     $('#dirty').style.display = on ? '' : 'none';
+    if (typeof setHH === 'function') setHH();
   };
   var imgSrc = function (u) {
     if (!u) return '';
@@ -113,9 +174,15 @@ label.f>span.req{color:var(--red)}
   var parseList = function (v) { return String(v || '').split(/[,\n]+/).map(function (x) { return x.trim(); }).filter(Boolean); };
   var rowsOf = function (kind) { return S.data[kind]; };
 
+  var setHH = function () { document.documentElement.style.setProperty('--hh', $('header').offsetHeight + 'px'); };
+  window.addEventListener('resize', setHH);
+
   /* ---------- Tabs ---------- */
   function renderTabs() {
     var items = ['paket', 'frame', 'galeri', 'instagram'].map(function (k) { return [k, S.schema[k].label]; }).concat([['info', 'Info Studio']]);
+    var cur = items.filter(function (it) { return it[0] === tab; })[0];
+    $('#pageTitle').firstChild.nodeValue = (cur ? cur[1] : 'Admin') + ' ';
+    if (typeof setHH === 'function') setHH();
     $('#tabs').innerHTML = items.map(function (it) { return '<button data-t="' + it[0] + '" class="' + (it[0] === tab ? 'on' : '') + '">' + esc(it[1]) + '</button>'; }).join('');
   }
   $('#tabs').addEventListener('click', function (e) {
@@ -125,7 +192,7 @@ label.f>span.req{color:var(--red)}
 
   /* ---------- Daftar ---------- */
   function subtitle(kind, r) {
-    if (kind === 'paket') return 'Rp' + Number(r.price_amount || 0).toLocaleString('id-ID') + (r.duration_value ? ' · ' + r.duration_value + ' ' + (r.duration_unit || 'menit') : '');
+    if (kind === 'paket') return 'Rp' + Number(r.price_amount || 0).toLocaleString('id-ID') + (r.price_max_amount ? ' – Rp' + Number(r.price_max_amount).toLocaleString('id-ID') : '') + (r.duration_value ? ' · ' + r.duration_value + ' ' + (r.duration_unit || 'menit') : '');
     if (kind === 'frame') return [r.type, r.size, r.label].filter(Boolean).join(' · ');
     if (kind === 'galeri') return r.category || '';
     return '';
@@ -137,12 +204,12 @@ label.f>span.req{color:var(--red)}
   }
   function renderList() {
     var kind = tab, def = S.schema[kind], rows = rowsOf(kind);
-    var html = '<div class="panel"><div class="head"><h2>' + rows.length + ' ' + def.singular + '<small>Urutan di sini = urutan di situs. Tahan ⠿ lalu geser untuk memindahkan.</small></h2>' +
+    var html = '<div class="panel"><div class="sticky"><div class="head"><h2>' + rows.length + ' ' + def.singular + '<small>Urutan di sini = urutan di situs. Tahan ⠿ lalu geser untuk memindahkan.</small></h2>' +
       '<button class="btn ghost" id="selBtn">' + (selecting ? 'Batal' : 'Pilih') + '</button>' +
       '<button class="btn" id="addBtn">+ Tambah ' + def.singular + '</button></div>' +
       '<div class="bulk ' + (selecting ? 'on' : '') + '" id="bulk"><label><input type="checkbox" id="selAll" class="chk" style="display:inline-block"> Pilih semua</label><span class="cnt" id="cnt">Pilih item untuk aksi massal</span>' +
       '<button class="btn sm ghost" data-bulk="show" disabled>Tampilkan</button><button class="btn sm ghost" data-bulk="hide" disabled>Sembunyikan</button><button class="btn sm danger" data-bulk="delete" disabled>Hapus</button></div>' +
-      '<div id="list">';
+      '</div><div id="list">';
     if (!rows.length) html += '<div class="empty">Belum ada data. Klik "+ Tambah ' + esc(def.singular) + '" untuk mulai.</div>';
     rows.forEach(function (r) {
       var src = imgSrc(r.image);
@@ -265,16 +332,97 @@ label.f>span.req{color:var(--red)}
     }
     return '<label class="f">' + esc(f.label) + req + inner + '</label>';
   }
+  // Field ber-'after' ditampilkan tepat setelah field tujuannya (urutan kolom Sheet tidak berubah)
+  function orderedFields(def) {
+    var base = def.fields.filter(function (f) { return !f.after; }), out = [];
+    base.forEach(function (f) {
+      out.push(f);
+      def.fields.forEach(function (g) { if (g.after === f.k) out.push(g); });
+    });
+    return out;
+  }
+  // Tampilan form paket: yang penting di depan, sisanya di "Pengaturan lain"
+  var UI = {
+    active: ['Tampilkan di situs', ''],
+    name: ['Nama paket', 'Contoh: Photostrip'],
+    price_amount: ['Harga', 'Tulis angka saja, tanpa titik. Contoh: 25000'],
+    price_max_amount: ['Sampai harga', 'Contoh: 50000. Akan tampil "30K – 50K".'],
+    features: ['Isi paket', 'Satu baris = satu centang di kartu. Tekan Enter untuk baris baru.'],
+    color: ['Warna kartu', ''],
+    description: ['Deskripsi singkat', 'Kalimat pendek di bawah nama paket. Boleh dikosongkan.'],
+    duration_value: ['Lama sesi', 'Boleh dikosongkan.'],
+    duration_unit: ['Satuan lama sesi', ''],
+    price_note: ['Tulisan kecil di atas harga', 'Contoh: Mulai dari. Pilih tombol di bawah atau ketik sendiri.'],
+    price_style: ['Bentuk tulisan harga', ''],
+    old_price_amount: ['Harga lama (dicoret)', 'Isi kalau sedang promo. Boleh dikosongkan.'],
+    addon_price_amount: ['Harga tambahan (add-on)', 'Contoh: 15000, untuk cetak tambahan. Boleh dikosongkan.'],
+    addon_text: ['Keterangan tambahan', 'Contoh: 1 Cetakan sama dengan sesi sebelumnya'],
+    tag: ['Label di kartu', 'Contoh: Best Seller. Boleh dikosongkan.'],
+    is_featured: ['Jadikan paket unggulan', '']
+  };
+  var UI2 = {
+    frame: { name: ['Nama frame', 'Contoh: Retro Blue'], image: ['Gambar frame', 'Pilih gambar dari HP atau komputer. Otomatis dikecilkan.'], label: ['Label di pojok (tidak wajib)', 'Contoh: NEW DROP. Pilih tombol di bawah atau ketik sendiri.'], type: ['Jenis frame', 'Dipakai untuk penyaring di situs.'], size: ['Ukuran', 'Contoh: 2R atau 4R'], color: ['Warna latar', 'Dipakai kalau frame belum punya gambar.'] },
+    galeri: { title: ['Judul foto', 'Contoh: Sesi Wisuda'], image: ['Foto', 'Pilih foto dari HP atau komputer. Otomatis dikecilkan.'], category: ['Kategori', 'Pilih tombol di bawah atau ketik sendiri.'] },
+    instagram: { url: ['Link postingan Instagram', 'Buka postingan di Instagram, ketuk titik tiga, lalu Salin link. Contoh: instagram.com/p/xxxx'] }
+  };
+  function plainField(kind, f, v) {
+    var u = (UI2[kind] || {})[f.k]; if (!u) return fieldHtml(f, v);
+    var c = {}; for (var i in f) c[i] = f[i]; c.label = u[0];
+    return fieldHtml(c, v).replace(/<\/label>$/, '<small class="hint">' + esc(u[1]) + '</small></label>');
+  }
+  var MAIN = ['name', 'price_amount', 'features', 'color'];
+  var MORE = ['description', 'duration_value', 'duration_unit', 'price_note', 'price_style', 'old_price_amount', 'addon_price_amount', 'addon_text', 'tag', 'is_featured'];
+  function paketField(def, k, vals) {
+    var f = def.fields.filter(function (x) { return x.k === k; })[0];
+    var c = {}; for (var i in f) c[i] = f[i]; c.label = UI[k][0];
+    var h = fieldHtml(c, vals[k]);
+    return UI[k][1] ? h.replace(/<\/label>$/, '<small class="hint">' + esc(UI[k][1]) + '</small></label>') : h;
+  }
+  function paketForm(def, vals) {
+    var hasMore = MORE.some(function (k) { return vals[k] !== '' && vals[k] != null && vals[k] !== false && k !== 'duration_unit' && k !== 'price_style'; });
+    var range = vals.price_max_amount !== '' && vals.price_max_amount != null;
+    return '<div class="formgrid"><div>' + paketField(def, 'active', vals) + paketField(def, 'name', vals) + paketField(def, 'price_amount', vals) +
+      '<button type="button" class="toggle" id="rangeBtn">' + (range ? '− Hapus harga rentang' : '+ Harganya rentang? (mis. 30K – 50K)') + '</button>' +
+      '<div id="rangeBox"' + (range ? '' : ' hidden') + '>' + paketField(def, 'price_max_amount', vals) + '</div>' +
+      paketField(def, 'features', vals) + paketField(def, 'color', vals) +
+      '<details class="more"' + (hasMore ? ' open' : '') + '><summary>Pengaturan lain (tidak wajib)</summary>' + MORE.map(function (k) { return paketField(def, k, vals); }).join('') + '</details></div>' +
+      '<div class="pvwrap"><b>PRATINJAU</b><div class="pv" id="pv"></div><small class="hint">Ini gambaran kasar. Tampilan asli di situs bisa sedikit berbeda.</small></div></div>';
+  }
+  function money(n, style) { n = Number(n) || 0; return style !== 'rp' && n >= 1000 && n % 1000 === 0 ? n / 1000 + 'K' : n.toLocaleString('id-ID'); }
+  function updatePreview() {
+    var pv = $('#pv'); if (!pv) return;
+    var g = function (k) { var el = $('[data-k="' + k + '"]'); return el ? el.value : ''; };
+    var st = g('price_style'), mx = g('price_max_amount') && !$('#rangeBox').hidden ? ' – ' + money(g('price_max_amount'), st) : '';
+    pv.style.setProperty('--c', g('color') || '#0022ff');
+    pv.innerHTML = '<div class="pt"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="4"/></svg></div>' +
+      '<h4>' + esc(g('name') || 'Nama paket') + '</h4><div class="pn">' + esc(g('price_note')) + '</div>' +
+      '<div class="pp"><small>Rp</small>' + esc(money(g('price_amount'), st) + mx) + '</div>' +
+      '<ul>' + g('features').split('\n').map(function (x) { return x.trim(); }).filter(Boolean).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' +
+      (g('addon_price_amount') ? '<div class="pa"><b>Add On <span>Rp' + esc(money(g('addon_price_amount'), st)) + '</span></b><br>' + esc(g('addon_text')) + '</div>' : '') +
+      '<div class="ps">Pilih paket <span>→</span></div>';
+  }
+  ['input', 'change', 'click'].forEach(function (t) { document.addEventListener(t, function () { setTimeout(updatePreview, 0); }); });
+  document.addEventListener('click', function (e) {
+    if (e.target.id !== 'rangeBtn') return;
+    var box = $('#rangeBox'), on = box.hidden;
+    box.hidden = !on;
+    if (!on) $('[data-k="price_max_amount"]').value = '';
+    e.target.textContent = on ? '− Hapus harga rentang' : '+ Harganya rentang? (mis. 30K – 50K)';
+    updatePreview();
+  });
+
   var editing = null;
   function openForm(kind, id) {
     var def = S.schema[kind];
     var rec = id ? rowsOf(kind).filter(function (r) { return r.id === id; })[0] : null;
     editing = { kind: kind, id: id };
     var vals = rec || { active: true, duration_unit: 'menit', price_style: 'k', color: '#0022ff' };
-    $('#card').innerHTML = '<h3>' + (id ? 'Ubah ' : 'Tambah ') + esc(def.singular) + '</h3><form id="form">' +
-      def.fields.map(function (f) { return fieldHtml(f, vals[f.k]); }).join('') +
-      '<div class="err" id="ferr"></div><div class="foot"><button type="button" class="btn ghost" id="cancel">Batal</button><button class="btn" id="save">Simpan</button></div></form>';
+    $('#card').className = kind === 'paket' ? 'card wide' : 'card';
+    $('#card').innerHTML = '<h3>' + (id ? 'Ubah ' : 'Tambah ') + esc(def.singular) + '</h3><form id="form"><div class="fbody">' +
+      (kind === 'paket' ? paketForm(def, vals) : orderedFields(def).map(function (f) { return plainField(kind, f, vals[f.k]); }).join('')) +
+      '<div class="err" id="ferr"></div></div><div class="foot"><button type="button" class="btn ghost" id="cancel">Batal</button><button class="btn" id="save">Simpan</button></div></form>';
     $('#modal').classList.add('on');
+    if (kind === 'paket') updatePreview();
   }
   function closeForm() { $('#modal').classList.remove('on'); editing = null; }
   document.addEventListener('click', function (e) {
@@ -358,7 +506,21 @@ label.f>span.req{color:var(--red)}
       });
     });
     $('#view').innerHTML = h + '</form></div>';
+    var latEl = $('[data-s="latitude"]');
+    if (latEl) {
+      latEl.closest('label').insertAdjacentHTML('beforebegin', '<div class="locbox"><b>Atur lokasi dengan mudah</b><p>Buka Google Maps, cari tempatnya, tekan <b>Bagikan</b> lalu <b>Salin link</b>. Tempel di sini, koordinat terisi sendiri.</p><input type="text" id="locIn" placeholder="Tempel link Google Maps di sini"><button type="button" class="btn sm" id="locBtn">Ambil koordinat</button><small id="locMsg">Latitude dan Longitude di bawah akan terisi otomatis.</small></div>');
+    }
   }
+  document.addEventListener('click', async function (e) {
+    if (e.target.id !== 'locBtn') return;
+    var msg = $('#locMsg'), b = e.target; b.disabled = true; msg.style.color = ''; msg.textContent = 'Mencari…';
+    try {
+      var r = await run('api_parseLocation', $('#locIn').value);
+      $('[data-s="latitude"]').value = r.lat; $('[data-s="longitude"]').value = r.lon;
+      msg.textContent = 'Terisi: ' + r.lat + ', ' + r.lon + '. Klik Simpan supaya tersimpan.';
+    } catch (err) { msg.textContent = err.message; msg.style.color = '#d22'; }
+    b.disabled = false;
+  });
   document.addEventListener('click', async function (e) {
     if (e.target.id !== 'infoSave') return;
     var obj = {};
@@ -367,6 +529,27 @@ label.f>span.req{color:var(--red)}
     try { S.settings = await run('api_saveSettings', obj); setDirty(true); toast('Tersimpan.'); } catch (err) { toast(err.message, true); }
     e.target.disabled = false;
   });
+
+  /* ---------- Panduan per halaman ---------- */
+  var HELP = {
+    paket: ['Paket', ['Klik <b>+ Tambah paket</b> untuk paket baru, atau <b>Ubah</b> untuk mengedit.', 'Isi <b>Harga</b>. Kalau harganya rentang (mis. Request Frame 30K – 50K), isi juga <b>Harga sampai</b>.', 'Satu baris di kotak <b>Isi paket</b> = satu centang di kartu.', 'Geser ⠿ untuk mengatur urutan tampil.', 'Ingin menyembunyikan tanpa menghapus? Matikan <b>Tampilkan di situs</b>.'], 'Harga fix yang tergantung desain, tulis di isi paket, mis. "Harga fix wajib via chat".'],
+    frame: ['Frame', ['Klik <b>+ Tambah frame</b>, isi nama, lalu unggah gambar.', 'Foto otomatis dikecilkan, jadi aman dari HP.', 'Pakai <b>Pilih</b> untuk menyembunyikan atau menghapus banyak frame sekaligus.', 'Geser ⠿ untuk mengatur urutan.'], 'Frame bertanda NEW DROP / LIMITED diisi di kolom Label.'],
+    galeri: ['Galeri', ['Klik <b>+ Tambah galeri</b>, unggah foto hasil sesi, beri judul dan kategori.', 'Kategori bisa dipilih cepat dari tombol di bawah isian.', 'Geser ⠿ untuk mengatur urutan tampil.'], 'Pakai foto yang sudah izin dipublikasikan oleh yang difoto.'],
+    instagram: ['Instagram', ['Buka postingan di Instagram, salin <b>link</b>-nya.', 'Klik <b>+ Tambah instagram</b>, tempel link, Simpan.', 'Hanya link postingan publik yang bisa tampil.'], 'Kalau kartu tidak muncul di situs, coba muat ulang dengan hard refresh.'],
+    info: ['Info Studio', ['Grup <b>Studio &amp; lokasi</b>: nama, alamat, titik peta, hari dan jam buka.', 'Grup <b>Kontak &amp; sosial media</b>: nomor WhatsApp pakai awalan 62, tanpa + atau spasi.', 'Grup <b>Teks halaman depan</b>: judul besar dan kalimat pembuka.', 'Grup <b>Bagian yang ditampilkan</b>: centang untuk menampilkan atau menyembunyikan bagian situs.', 'Klik <b>Simpan</b> di kanan atas kartu.'], 'Di judul beranda, isi "Aksata Cerita" utuh pada kolom Kata disorot supaya tidak terpisah.']
+  };
+  function openHelp() {
+    var h = HELP[tab] || HELP.paket;
+    $('#card').className = 'card';
+    $('#card').innerHTML = '<h3>Panduan: ' + esc(h[0]) + '</h3><div class="fbody guide"><ol>' + h[1].map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol>' +
+      '<p class="tip">' + esc(h[2]) + '</p>' +
+      '<p>Setiap perubahan langsung tampil di situs setelah <b>Simpan</b>. <b>Terbitkan</b> cukup sesekali, untuk membuat cadangan permanen.</p>' +
+      '<p><a href="https://aksatacerita.github.io/panduan.html" target="_blank" rel="noopener">Buka panduan lengkap ↗</a></p></div>' +
+      '<div class="foot"><button type="button" class="btn" id="cancel">Mengerti</button></div>';
+    $('#modal').classList.add('on');
+  }
+  $('#helpBtn').addEventListener('click', openHelp);
+  document.addEventListener('keydown', function (e) { if (e.key === '?' && !/INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '')) openHelp(); });
 
   function render() { if (tab === 'info') renderInfo(); else renderList(); }
 
@@ -382,7 +565,7 @@ label.f>span.req{color:var(--red)}
     S = s; $('#who').textContent = s.email;
     $('#publish').disabled = false;
     if (!s.github) $('#publish').title = 'Penerbitan ke GitHub belum diatur; situs membaca langsung dari Sheets.';
-    renderTabs(); render();
+    renderTabs(); setHH(); render();
   }).catch(function (e) {
     $('#view').innerHTML = '<div id="gate"><h2>Tidak bisa masuk</h2><p>' + esc(e.message) + '</p></div>';
   });

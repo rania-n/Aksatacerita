@@ -39,6 +39,7 @@
   function packageCard(pkg, active, iconName) {
     const color = hexOf(pkg.color);
     const old = pkg.old_price_amount ? money(pkg.old_price_amount, pkg.price_style) : '';
+    const max = pkg.price_max_amount ? money(pkg.price_max_amount, pkg.price_style) : '';
     const addon = pkg.addon_price_amount ? money(pkg.addon_price_amount, pkg.price_style) : '';
     const duration = pkg.duration_value ? `${pkg.duration_value} ${pkg.duration_unit || 'menit'}` : '';
     return `<article class="package-card ${active ? 'active' : ''}" style="--card: ${color}">
@@ -46,8 +47,8 @@
       <div>
         <h3>${esc(pkg.name)}</h3>
         ${pkg.description ? `<p class="package-desc">${esc(pkg.description)}</p>` : ''}
-        ${pkg.price_note ? `<p>${esc(pkg.price_note)}</p>` : ''}
-        <strong><small>Rp</small><span>${money(pkg.price_amount, pkg.price_style)}</span></strong>
+        <p class="package-note">${esc(pkg.price_note)}</p>
+        <strong class="${max ? 'has-range' : ''}"><small>Rp</small><span>${money(pkg.price_amount, pkg.price_style)}${max ? ` – ${max}` : ''}</span></strong>
         ${old ? `<s class="package-old">Rp${old}</s>` : ''}
       </div>
       ${duration ? `<div class="package-duration">${icon('clock', 14)} <span>${esc(duration)}</span></div>` : ''}
@@ -173,13 +174,13 @@
     <section class="cta-section"><div class="cta-orbit orbit-one">SAY CHEESE · SAY CHEESE ·</div><div class="cta-stars">✦　✧　✦</div><h2>Ready to make<br>your own <i>story?</i></h2><p>Nggak perlu jago pose. Datang aja, sisanya biar kami yang bikin seru.</p><button class="btn btn-light" data-open-booking>${icon('camera')} Mulai ceritamu</button></section>
     <footer><div class="shell footer-top">${brand(true)}<div><b>Explore</b><a href="#paket">Paket &amp; Harga</a>${showFrames ? '<a href="#frame">Katalog Frame</a>' : ''}${gallery.length ? '<a href="#galeri">Galeri Momen</a>' : ''}</div><div><b>Social</b><a href="https://instagram.com/${esc(s.instagram)}" target="_blank" rel="noreferrer">@${esc(s.instagram)} ↗</a>${s.tiktok ? `<a href="https://www.tiktok.com/@${esc(s.tiktok)}" target="_blank" rel="noreferrer">TikTok ↗</a>` : ''}${s.facebook ? `<a href="${esc(s.facebook)}" target="_blank" rel="noreferrer">Facebook ↗</a>` : ''}<a href="${waText}" target="_blank" rel="noreferrer">WhatsApp ↗</a></div><div class="footer-note">Made for<br><i>good stories.</i></div></div>
     <div class="shell footer-bottom"><span>© ${new Date().getFullYear()} AKSATACERITA PHOTOBOOTH · ${esc(String(s.city || '').toUpperCase())}</span></div>
-    <div class="shell"><p class="credit credit-footer"><span class="credit-mark">✦</span><span>Dibuat oleh <b>Siswa RPL SMKN 1 Boyolangu</b></span></p></div></footer>
+    <div class="shell"><p class="credit credit-footer"><span class="credit-mark">✦</span><span>Dibuat oleh <b>Tim RPL SMKN 1 Boyolangu</b> · <a href="https://timdev3k.vercel.app" target="_blank" rel="noopener">Kenalan dengan tim kami ↗</a></span></p></div></footer>
     <a class="floating-wa" href="${waText}" target="_blank" rel="noreferrer" aria-label="Chat WhatsApp">${icon('whatsapp')}</a>
     <div class="booking-backdrop" data-close-booking></div>
     <aside class="booking-drawer" aria-hidden="true">
       <div class="booking-head"><div><span>RESERVE YOUR MOMENT</span><h2>Pesan sesi.</h2></div><button data-close-booking aria-label="Tutup">${icon('x')}</button></div>
       <div class="booking-step"><span>01</span><div><b>Pilih sesi favoritmu</b><p>Kamu bisa konfirmasi ulang lewat WhatsApp.</p></div></div>
-      <div class="session-options">${packages.map((pkg) => `<button data-name="${esc(pkg.name)}"><span>${icon('camera')}</span><div><b>${esc(pkg.name)}</b><small>${esc(pkg.price_note || 'Harga')} Rp${money(pkg.price_amount, pkg.price_style)}</small></div><i>○</i></button>`).join('')}</div>
+      <div class="session-options">${packages.map((pkg) => `<button data-name="${esc(pkg.name)}"><span>${icon('camera')}</span><div><b>${esc(pkg.name)}</b><small>${esc(pkg.price_note || 'Harga')} Rp${money(pkg.price_amount, pkg.price_style)}${pkg.price_max_amount ? ' – ' + money(pkg.price_max_amount, pkg.price_style) : ''}</small></div><i>○</i></button>`).join('')}</div>
       <div class="booking-step"><span>02</span><div><b>Pilih waktu datang</b><p>${esc(s.open_days)}, ${esc(s.open_hours)}</p></div></div>
       <div class="date-chips"><button type="button" data-when="hari ini" class="active">Hari ini<small>Walk in</small></button><button type="button" data-when="besok">Besok<small>Datang besok</small></button><button type="button" data-when="date">Pilih tanggal<small>Kalender</small></button></div>
       <input type="date" class="booking-date" aria-label="Tanggal kedatangan" hidden>
@@ -200,15 +201,22 @@
       address: { '@type': 'PostalAddress', streetAddress: String(s.address || '').replace(/\n/g, ' '), addressLocality: s.city, addressCountry: 'ID' },
       sameAs: ['https://instagram.com/' + s.instagram, s.tiktok ? 'https://www.tiktok.com/@' + s.tiktok : null, s.facebook || null].filter(Boolean),
     };
+    const old = document.getElementById('ld-json'); if (old) old.remove();
     const tag = document.createElement('script');
+    tag.id = 'ld-json';
     tag.type = 'application/ld+json';
     tag.textContent = JSON.stringify(ld);
     document.head.appendChild(tag);
     if (s.show_instagram === '1' && (data.instagram || []).length) {
-      const embed = document.createElement('script');
-      embed.async = true;
-      embed.src = 'https://www.instagram.com/embed.js';
-      document.body.appendChild(embed);
+      // Pertama kali: muat embed.js (memproses otomatis). Gambar ulang: minta Instagram memproses blok yang baru.
+      if (window.instgrm && window.instgrm.Embeds) window.instgrm.Embeds.process();
+      else if (!document.getElementById('ig-embed')) {
+        const embed = document.createElement('script');
+        embed.id = 'ig-embed';
+        embed.async = true;
+        embed.src = 'https://www.instagram.com/embed.js';
+        document.body.appendChild(embed);
+      }
     }
   };
 })();
